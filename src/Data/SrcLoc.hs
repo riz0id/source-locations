@@ -15,7 +15,10 @@
 -- @since 1.0.0
 module Data.SrcLoc
   ( -- * Source Locations
-    SrcLoc (SrcLoc),
+    SrcLoc (SL, SrcLoc),
+    posn,
+    line,
+    coln,
 
     -- * Construction
     empty,
@@ -23,11 +26,6 @@ module Data.SrcLoc
     -- * Basic Operations
     feed,
     diff,
-
-#ifdef LENS
-    -- * Lenses
-    module Data.SrcLoc.Lens
-#endif
   )
 where
 
@@ -35,19 +33,15 @@ import GHC.Exts (Char (C#))
 
 --------------------------------------------------------------------------------
 
-import Data.SrcLoc.Core (SrcLoc (SL, SrcLoc))
+import Data.SrcLoc.Core (SrcLoc (SL, SrcLoc, coln, line, posn))
 import Data.SrcLoc.Prim qualified as Prim
-
-#ifdef LENS
-import Data.SrcLoc.Lens (posn, line, coln)
-#endif
 
 -- Construction ----------------------------------------------------------------
 
 -- | The empty source location, equivalent to:
 --
 -- @
--- 'empty' == 'SrcLoc' 0 1 1 
+-- 'empty' == 'SrcLoc' 0 1 1
 -- @
 --
 -- @since 1.0.0
@@ -64,7 +58,7 @@ empty = SrcLoc 0 1 1
 -- * For a newline character (i.e. @'\\n'@ or @'\\r'@) the position and line
 --   number fields are incremented. The columnn field is set to @1@.
 --
--- * For any character that is not a newline character, the position and 
+-- * For any character that is not a newline character, the position and
 --   column number fields are increment. The line number is left unmodified.
 --
 -- >>> foldl feed empty "abc \n xyz"

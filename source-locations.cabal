@@ -90,10 +90,5 @@ library
   other-modules:
     Data.SrcLoc.Core
 
-  if flag(lens)
-    cpp-options:     -DLENS
-    build-depends:   microlens 
-    exposed-modules: Data.SrcLoc.Lens
-
   if flag(llvm)
     ghc-options: -fllvm

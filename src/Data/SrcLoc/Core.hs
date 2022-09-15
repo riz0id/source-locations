@@ -19,7 +19,7 @@
 -- @since 1.0.0
 module Data.SrcLoc.Core
   ( -- * Source Locations
-    SrcLoc (SL, SrcLoc),
+    SrcLoc (SL, SrcLoc, posn, line, coln),
   )
 where
 
@@ -29,7 +29,6 @@ import Data.Data qualified as Data
 import Data.Int.Prim (Int#)
 
 import GHC.Exts (Int (I#))
-import GHC.Records (HasField, getField)
 
 import Language.Haskell.TH qualified as TH
 import Language.Haskell.TH.Syntax (Lift, lift, liftTyped)
@@ -66,7 +65,7 @@ pattern SrcLoc ::
   -- | The column of the source location.
   Int ->
   SrcLoc
-pattern SrcLoc posn line coln =
+pattern SrcLoc {posn, line, coln} =
   SL (SL# (# UnI# posn, UnI# line, UnI# coln #))
 
 {-# COMPLETE SrcLoc #-}
@@ -129,29 +128,6 @@ instance PrintfArg SrcLoc where
 instance Show SrcLoc where
   show (SrcLoc p l c) = "SrcLoc " ++ shows p " " ++ shows l " " ++ show c
   {-# INLINE show #-}
-
--- Instances - Has Field -------------------------------------------------------
-
--- | 'HasField' instance selecting the 'Data.SrcLoc.posn' field getter.
---
--- @since 1.0.0
-instance HasField "posn" SrcLoc Int where
-  getField (SrcLoc x _ _) = x
-  {-# INLINE getField #-}
-
--- | 'HasField' instance selecting the 'Data.SrcLoc.line' field getter.
---
--- @since 1.0.0
-instance HasField "line" SrcLoc Int where
-  getField (SrcLoc _ x _) = x
-  {-# INLINE getField #-}
-
--- | 'HasField' instance selecting the 'Data.SrcLoc.coln' field getter.
---
--- @since 1.0.0
-instance HasField "coln" SrcLoc Int where
-  getField (SrcLoc _ _ x) = x
-  {-# INLINE getField #-}
 
 --------------------------------------------------------------------------------
 

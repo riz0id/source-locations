@@ -10,7 +10,6 @@ This packages provides a type for representing source locations along with basic
 - [Documentation](#documentation)
 - [Building](#building)
   - [Flag Reference](#flag-reference)
-    - [The `lens` Flag](#the-lens-flag)
     - [The `llvm` Flag](#the-llvm-flag)
   - [Building via Nix](#building-via-nix) 
 
@@ -31,25 +30,12 @@ $ cabal v2-haddock
 TODO
 
 - [Flag Reference](#flag-reference)
-  - [The `lens` Flag](#the-lens-flag)
   - [The `llvm` Flag](#the-llvm-flag)
 - [Building via Nix](#building-via-nix) 
 
 ## Flag Reference
 
 Documentation for flags supported by [`source-locations.cabal`](./source-locations.cabal) that can be specified to configure how `source-locations` is built. 
-
-### The `lens` Flag
-
-The `-flens` flag can be specified when building the `source-locations` package to omit lenses and lens dependencies. This can help improve compile times if:
-
-1. You don't depend on the lenses defined in [`Data.SrcLoc.Lens`](src/Data/SrcLoc/Lens.hs).
-
-2. You don't already require the [`microlens`](https://hackage.haskell.org/package/microlens) package as a dependency.
-
-```bash
-$ cabal v2-build -fomit-lens
-```
 
 ### The `llvm` Flag
 
