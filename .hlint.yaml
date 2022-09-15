@@ -1,0 +1,20 @@
+- arguments: [
+  --color, 
+  --cpp-simple,
+  -XMagicHash,
+  -XTemplateHaskellQuotes,
+  -XUnboxedTuples,
+  -XUnliftedNewtypes,
+]
+- modules:
+  - {name: GHC.Exts, as: GHC} 
+  - {
+    name: GHC.Magic, 
+    message: "Import GHC.Exts qualified as Exts instead",
+    within: []
+  } 
+  - {
+    name: GHC.Prim, 
+    message: "Import GHC.Exts qualified as Exts instead",
+    within: []
+  } 

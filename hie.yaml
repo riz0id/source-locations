@@ -1,0 +1,10 @@
+cradle:
+  cabal:
+    - path: "./src"
+      component: "lib:source-locations"
+      
+dependencies:
+  - source-locations.cabal
+  - default.nix
+  - shell.nix
+  - .hlint.yaml

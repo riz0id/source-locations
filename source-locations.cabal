@@ -1,0 +1,99 @@
+cabal-version: 2.4
+
+name:        source-locations
+category:    Data
+version:     1.0.0
+synopsis:    Create and manipulate source file locations.  
+description: 
+  This packages provides the 'SrcLoc' type for representing source locations 
+  along with basic operations for creating and manipulating source locations.
+
+author:       jacob leach
+maintainer:   jacobleach@protonmail.com
+copyright:    2022, Jacob Leach
+homepage:     https://github.com/riz0id/source-locations
+license:      ISC
+license-file: LICENSE
+build-type:   Simple
+
+tested-with:
+  GHC == 9.2.2
+
+extra-source-files:
+  CHANGELOG.md
+  README.md
+
+source-repository head
+  type:     git
+  location: https://github.com/riz0id/source-locations
+
+flag lens
+  Description: Compile definitions and dependencies for lenses. 
+  Default:     False
+  Manual:      True
+
+flag llvm
+  Description: Compile using the LLVM backend.
+  Default:     False
+  Manual:      True
+
+common common
+  default-language: Haskell2010
+
+  default-extensions:
+    ImportQualifiedPost
+
+  ghc-options:
+    -Wall
+    -Wcompat
+    -Wcpp-undef
+    -Widentities
+    -Wmissing-export-lists
+
+  build-depends:
+    , base >= 4.15.1 && < 4.17
+
+library
+  import:         common
+  hs-source-dirs: src
+
+  default-extensions:
+    MagicHash
+
+  ghc-options:
+    -- `-j4` is set (as opposed to `-j`) due to the small number of modules that 
+    -- are exported by this package. This can sometimes help speed up compile 
+    -- times by reducing thread contention.
+    -j4
+
+    -- This package does not benefit from higher specifying optimization levels
+    -- such as `-O2`. 
+    -O1
+
+    -- `-fmax-simplifier-iterations` is set to keep compile times in check. 
+    -- Most definitions in this package have had manual w/w transformations 
+    -- applied, leaving little room for the simplifier to make improvements with
+    -- more iterations. 
+    -fmax-simplifier-iterations=4
+
+  build-depends:
+    , ghc-prim         >= 0.7.0  && < 0.9
+    , prim-bool        >= 1.0.1  && < 1.1.0
+    , prim-char        >= 1.0.0  && < 1.1.0
+    , prim-int         >= 1.0.0  && < 1.1.0
+    , template-haskell >= 2.17.0 && < 2.19
+
+  exposed-modules:
+    Data.SrcLoc
+    Data.SrcLoc.Prim
+
+  other-modules:
+    Data.SrcLoc.Core
+
+  if flag(lens)
+    cpp-options:     -DLENS
+    build-depends:   microlens 
+    exposed-modules: Data.SrcLoc.Lens
+
+  if flag(llvm)
+    ghc-options: -fllvm
