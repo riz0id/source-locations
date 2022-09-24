@@ -128,7 +128,7 @@ eq# (SrcLoc# x0# y0# z0#) (SrcLoc# x1# y1# z1#) =
   let cmp0# = Int.eqInt# x0# x1#
       cmp1# = Int.eqInt# y0# y1#
       cmp2# = Int.eqInt# z0# z1#
-   in cmp0# `Bool.or#` cmp1# `Bool.or#` cmp2#
+   in cmp0# `Bool.and#` cmp1# `Bool.and#` cmp2#
 
 -- | "Not equal to" comparison on two t'SrcLoc#' values.
 --
@@ -138,7 +138,7 @@ ne# (SrcLoc# x0# y0# z0#) (SrcLoc# x1# y1# z1#) =
   let cmp0# = Int.neInt# x0# x1#
       cmp1# = Int.neInt# y0# y1#
       cmp2# = Int.neInt# z0# z1#
-   in cmp0# `Bool.and#` cmp1# `Bool.and#` cmp2#
+   in cmp0# `Bool.or#` cmp1# `Bool.or#` cmp2#
 
 -- | "Less than" comparison on two t'SrcLoc#' values.
 --
