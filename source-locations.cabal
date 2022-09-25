@@ -82,15 +82,6 @@ library
     -- more iterations. 
     -fmax-simplifier-iterations=20
 
-    -fllvm
-
-    -ddump-to-file
-    -ddump-stg-final
-    -ddump-llvm
-    -ddump-simpl
-    -dppr-cols=120
-    -dsuppress-module-prefixes
-
   build-depends:
     , ghc-prim         >= 0.7.0  && < 0.9
     , prim-bool        >= 1.0.1  && < 1.1.0
