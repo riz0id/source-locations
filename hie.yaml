@@ -2,7 +2,9 @@ cradle:
   cabal:
     - path: "./src"
       component: "lib:source-locations"
-      
+    - path: "./test"
+      component: "test:test" 
+
 dependencies:
   - source-locations.cabal
   - default.nix

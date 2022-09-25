@@ -20,6 +20,7 @@ module Data.SrcLoc.Prim
 
     -- * Basic Operations
     feed#,
+    diff#,
   )
 where
 
@@ -29,6 +30,7 @@ import Data.Int.Prim qualified as Int
 import Data.Ord.Prim (Eq# (..), Ord# (..), Ordering# (EQ#, GT#, LT#))
 
 import GHC.Exts (Char#, Int (I#))
+import qualified GHC.Exts as GHC
 
 import Language.Haskell.TH.Syntax (Exp, Lift, lift, liftTyped)
 import Language.Haskell.TH.Syntax qualified as TH
@@ -60,23 +62,35 @@ instance Eq# SrcLoc# where
 
 -- | @since 1.0.0
 instance Ord# SrcLoc# where
-  compare# loc0# loc1# =
-    case loc0# <# loc1# of
-      T# -> LT#
-      F# -> case loc0# ==# loc1# of
-        T# -> EQ#
-        F# -> GT#
+  compare# (SL# (# x0#, y0#, z0# #)) (SL# (# x1#, y1#, z1# #)) =
+    case compare# x0# x1# of 
+      EQ# -> case compare# y0# y1# of 
+        EQ# -> compare# z0# z1#
+        ord# -> ord#
+      ord# -> ord#
   {-# INLINE compare# #-}
 
   SL# (# x0#, y0#, z0# #) ># SL# (# x1#, y1#, z1# #) =
-    (x0# ># x1#) `or#` (y0# ># y1#) `or#` (z0# ># z1#)
+    case compare# x0# x1# of 
+      EQ# -> case compare# y0# y1# of 
+        EQ# -> z0# ># z1#
+        GT# -> T#
+        LT# -> F#
+      GT# -> T#
+      LT# -> F#
   {-# INLINE (>#) #-}
 
-  loc0# >=# loc1# = (loc0# ># loc1#) `or#` (loc0# ==# loc1#)
+  loc0# >=# loc1# = (loc0# ==# loc1#) `or#` (loc0# ># loc1#)
   {-# INLINE (>=#) #-}
 
   SL# (# x0#, y0#, z0# #) <# SL# (# x1#, y1#, z1# #) =
-    (x0# <# x1#) `or#` (y0# <# y1#) `or#` (z0# <# z1#)
+    case compare# x0# x1# of 
+      EQ# -> case compare# y0# y1# of 
+        EQ# -> z0# <# z1#
+        GT# -> F#
+        LT# -> T#
+      GT# -> F#
+      LT# -> T#
   {-# INLINE (<#) #-}
 
   loc0# <=# loc1# = (loc0# <# loc1#) `or#` (loc0# ==# loc1#)
@@ -96,24 +110,6 @@ instance Lift SrcLoc# where
   liftTyped loc# = TH.unsafeCodeCoerce (lift loc#)
   {-# INLINE liftTyped #-}
 
--- | Obtain the source position field from a t'SrcLoc#'.
---
--- @since 1.0.0
--- posn# :: SrcLoc# -> Int#
--- posn# (SrcLoc# x# _ _) = x#
-
--- | Obtain the line number field from a t'SrcLoc#'.
---
--- @since 1.0.0
--- line# :: SrcLoc# -> Int#
--- line# (SrcLoc# _ x# _) = x#
-
--- | Obtain the column number field from a t'SrcLoc#'.
---
--- @since 1.0.0
--- coln# :: SrcLoc# -> Int#
--- coln# (SrcLoc# _ _ x#) = x#
-
 -- Basic Operations ------------------------------------------------------------
 
 -- | "Feeds" a character to a t'SrcLoc#'. This produces a new t'SrcLoc#' with
@@ -132,3 +128,10 @@ feed# (SrcLoc# p# l# c#) chr# =
   case '\n'# ==# chr# of
     T# -> SrcLoc# (Int.addInt# 1# p#) (Int.addInt# 1# l#) 1#
     F# -> SrcLoc# (Int.addInt# 1# p#) l# (Int.addInt# 1# c#)
+
+-- | Take the difference of two 'SrcLoc#' source positions.
+--
+-- @since 1.0.0
+diff# :: SrcLoc# -> SrcLoc# -> Int#
+diff# (SrcLoc# x0# _ _) (SrcLoc# x1# _ _) = x1# GHC.-# x0#
+{-# INLINE diff# #-}
