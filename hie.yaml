@@ -7,4 +7,3 @@ dependencies:
   - source-locations.cabal
   - default.nix
   - shell.nix
-  - .hlint.yaml

@@ -1,6 +1,3 @@
-{-# LANGUAGE PatternSynonyms #-}
-{-# LANGUAGE TemplateHaskellQuotes #-}
-{-# LANGUAGE UnboxedTuples #-}
 {-# LANGUAGE UnliftedNewtypes #-}
 {-# OPTIONS_HADDOCK show-extensions #-}
 
@@ -19,31 +16,19 @@
 -- @since 1.0.0
 module Data.SrcLoc.Prim
   ( -- * Source Locations
-    SrcLoc# (SL#, SrcLoc#),
-    posn#,
-    line#,
-    coln#,
-
-    -- * Comparison
-    gt#,
-    ge#,
-    eq#,
-    ne#,
-    lt#,
-    le#,
+    SrcLoc# (SL#, SrcLoc#, posn#, line#, coln#),
 
     -- * Basic Operations
     feed#,
   )
 where
 
-import Data.Bool.Prim (Bool# (True#, False#))
-import Data.Bool.Prim qualified as Bool
+import Data.Bool.Prim (Bool# (F#, T#), and#, or#)
 import Data.Int.Prim (Int#)
 import Data.Int.Prim qualified as Int
-import Data.Char.Prim qualified as Char
+import Data.Ord.Prim (Eq# (..), Ord# (..), Ordering# (EQ#, GT#, LT#))
 
-import GHC.Exts (Int (I#), Char#)
+import GHC.Exts (Char#, Int (I#))
 
 import Language.Haskell.TH.Syntax (Exp, Lift, lift, liftTyped)
 import Language.Haskell.TH.Syntax qualified as TH
@@ -53,16 +38,49 @@ import Language.Haskell.TH.Syntax qualified as TH
 -- | t'SrcLoc#' is an unboxed source location.
 --
 -- @since 1.0.0
-newtype SrcLoc# = 
-  SL# (# Int#, Int#, Int# #)
+newtype SrcLoc# = SL# (# Int#, Int#, Int# #)
 
 -- | TODO
 --
 -- @since 1.0.0
 pattern SrcLoc# :: Int# -> Int# -> Int# -> SrcLoc#
-pattern SrcLoc# x# y# z# = SL# (# x#, y#, z# #)
+pattern SrcLoc# {posn#, line#, coln#} = SL# (# posn#, line#, coln# #)
 
 {-# COMPLETE SrcLoc# #-}
+
+-- | @since 1.0.0
+instance Eq# SrcLoc# where
+  SL# (# x0#, y0#, z0# #) ==# SL# (# x1#, y1#, z1# #) =
+    (x0# ==# x1#) `and#` (y0# ==# y1#) `and#` (z0# ==# z1#)
+  {-# INLINE (==#) #-}
+
+  SL# (# x0#, y0#, z0# #) /=# SL# (# x1#, y1#, z1# #) =
+    (x0# /=# x1#) `or#` (y0# /=# y1#) `or#` (z0# /=# z1#)
+  {-# INLINE (/=#) #-}
+
+-- | @since 1.0.0
+instance Ord# SrcLoc# where
+  compare# loc0# loc1# =
+    case loc0# <# loc1# of
+      T# -> LT#
+      F# -> case loc0# ==# loc1# of
+        T# -> EQ#
+        F# -> GT#
+  {-# INLINE compare# #-}
+
+  SL# (# x0#, y0#, z0# #) ># SL# (# x1#, y1#, z1# #) =
+    (x0# ># x1#) `or#` (y0# ># y1#) `or#` (z0# ># z1#)
+  {-# INLINE (>#) #-}
+
+  loc0# >=# loc1# = (loc0# ># loc1#) `or#` (loc0# ==# loc1#)
+  {-# INLINE (>=#) #-}
+
+  SL# (# x0#, y0#, z0# #) <# SL# (# x1#, y1#, z1# #) =
+    (x0# <# x1#) `or#` (y0# <# y1#) `or#` (z0# <# z1#)
+  {-# INLINE (<#) #-}
+
+  loc0# <=# loc1# = (loc0# <# loc1#) `or#` (loc0# ==# loc1#)
+  {-# INLINE (<=#) #-}
 
 -- | @since 1.0.0
 instance Lift SrcLoc# where
@@ -81,104 +99,36 @@ instance Lift SrcLoc# where
 -- | Obtain the source position field from a t'SrcLoc#'.
 --
 -- @since 1.0.0
-posn# :: SrcLoc# -> Int#
-posn# (SrcLoc# x# _ _) = x#
+-- posn# :: SrcLoc# -> Int#
+-- posn# (SrcLoc# x# _ _) = x#
 
 -- | Obtain the line number field from a t'SrcLoc#'.
 --
 -- @since 1.0.0
-line# :: SrcLoc# -> Int#
-line# (SrcLoc# _ x# _) = x#
+-- line# :: SrcLoc# -> Int#
+-- line# (SrcLoc# _ x# _) = x#
 
 -- | Obtain the column number field from a t'SrcLoc#'.
 --
 -- @since 1.0.0
-coln# :: SrcLoc# -> Int#
-coln# (SrcLoc# _ _ x#) = x#
-
--- Comparison ------------------------------------------------------------------
-
-infix 4 `gt#`, `ge#`, `eq#`, `ne#`
-
--- | "Greater than" comparison on two t'SrcLoc#' values.
---
--- @since 1.0.0
-gt# :: SrcLoc# -> SrcLoc# -> Bool#
-gt# (SrcLoc# x0# y0# z0#) (SrcLoc# x1# y1# z1#) =
-  let cmp0# = Int.gtInt# x0# x1#
-      cmp1# = Int.gtInt# y0# y1#
-      cmp2# = Int.gtInt# z0# z1#
-   in cmp0# `Bool.and#` cmp1# `Bool.and#` cmp2#
-
--- | "Greater than or equal to" comparison on two t'SrcLoc#' values.
---
--- @since 1.0.0
-ge# :: SrcLoc# -> SrcLoc# -> Bool#
-ge# (SrcLoc# x0# y0# z0#) (SrcLoc# x1# y1# z1#) =
-  let cmp0# = Int.geInt# x0# x1#
-      cmp1# = Int.geInt# y0# y1#
-      cmp2# = Int.geInt# z0# z1#
-   in cmp0# `Bool.and#` cmp1# `Bool.and#` cmp2#
-
--- | "Equal to" comparison on two t'SrcLoc#' values.
---
--- @since 1.0.0
-eq# :: SrcLoc# -> SrcLoc# -> Bool#
-eq# (SrcLoc# x0# y0# z0#) (SrcLoc# x1# y1# z1#) =
-  let cmp0# = Int.eqInt# x0# x1#
-      cmp1# = Int.eqInt# y0# y1#
-      cmp2# = Int.eqInt# z0# z1#
-   in cmp0# `Bool.and#` cmp1# `Bool.and#` cmp2#
-
--- | "Not equal to" comparison on two t'SrcLoc#' values.
---
--- @since 1.0.0
-ne# :: SrcLoc# -> SrcLoc# -> Bool#
-ne# (SrcLoc# x0# y0# z0#) (SrcLoc# x1# y1# z1#) =
-  let cmp0# = Int.neInt# x0# x1#
-      cmp1# = Int.neInt# y0# y1#
-      cmp2# = Int.neInt# z0# z1#
-   in cmp0# `Bool.or#` cmp1# `Bool.or#` cmp2#
-
--- | "Less than" comparison on two t'SrcLoc#' values.
---
--- @since 1.0.0
-lt# :: SrcLoc# -> SrcLoc# -> Bool#
-lt# (SrcLoc# x0# y0# z0#) (SrcLoc# x1# y1# z1#) =
-  let cmp0# = Int.ltInt# x0# x1#
-      cmp1# = Int.ltInt# y0# y1#
-      cmp2# = Int.ltInt# z0# z1#
-   in cmp0# `Bool.and#` cmp1# `Bool.and#` cmp2#
-
--- | "Less than or equal to" comparison on two t'SrcLoc#' values.
---
--- @since 1.0.0
-le# :: SrcLoc# -> SrcLoc# -> Bool#
-le# (SrcLoc# x0# y0# z0#) (SrcLoc# x1# y1# z1#) =
-  let cmp0# = Int.leInt# x0# x1#
-      cmp1# = Int.leInt# y0# y1#
-      cmp2# = Int.leInt# z0# z1#
-   in cmp0# `Bool.and#` cmp1# `Bool.and#` cmp2#
+-- coln# :: SrcLoc# -> Int#
+-- coln# (SrcLoc# _ _ x#) = x#
 
 -- Basic Operations ------------------------------------------------------------
 
--- | "Feeds" a character to a t'SrcLoc#'. This produces a new t'SrcLoc#' with 
+-- | "Feeds" a character to a t'SrcLoc#'. This produces a new t'SrcLoc#' with
 -- fields incremented according to the kind character the source location was
--- fed. 
+-- fed.
 --
--- * For a newline character (i.e. @'\\n'#@ or @'\\r'#@) the 'posn#' and 'line#' 
---   fields are incremented. The 'coln#' field is set to @1#@.
+-- * For a newline character the position and line number fields are
+--   incremented. The columnn field is set to @1#@.
 --
 -- * For any character that is not a newline character, the 'posn#' and 'coln#'
 --   fields are increment while 'line#' is left unmodified.
 --
 -- @since 1.0.0
-feed# :: SrcLoc# -> Char# -> SrcLoc# 
-feed# (SrcLoc# p# l# c#) chr# = 
-  case isNewline# chr# of 
-    True# -> SrcLoc# (Int.addInt# 1# p#) (Int.addInt# 1# l#) 1#
-    False# -> SrcLoc# (Int.addInt# 1# p#) l# (Int.addInt# 1# c#)
-
-isNewline# :: Char# -> Bool# 
-isNewline# chr# = Bool.or# (Char.eq# '\n'# chr#) (Char.eq# '\r'# chr#) 
-{-# INLINE isNewline# #-}
+feed# :: SrcLoc# -> Char# -> SrcLoc#
+feed# (SrcLoc# p# l# c#) chr# =
+  case '\n'# ==# chr# of
+    T# -> SrcLoc# (Int.addInt# 1# p#) (Int.addInt# 1# l#) 1#
+    F# -> SrcLoc# (Int.addInt# 1# p#) l# (Int.addInt# 1# c#)
