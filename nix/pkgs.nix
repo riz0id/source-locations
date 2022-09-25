@@ -2,22 +2,26 @@
 
 let
   nixpkgs = import ./nixpkgs.nix { };
-
-  overlay = self: super: {
-    haskell = super.haskell // {
-      packages = super.haskell.packages // {
-        "${ghc}" = super.haskell.packages."${ghc}".override (_: {
-          overrides = (new: _: {
-            prim-bool        = new.callPackage pkgs/prim-bool.nix { };
-            prim-char        = new.callPackage pkgs/prim-char.nix { }; 
-            prim-compat      = new.callPackage pkgs/prim-compat.nix { };
-            prim-int         = new.callPackage pkgs/prim-int.nix { };
-            source-locations = new.callCabal2nix "source-locations" ../. { };
-          });
-        });
-      };
-    };
-  };
 in import nixpkgs {
-  overlays = [ overlay ];
+  config.packageOverrides = pkgs: 
+    pkgs.lib.composeManyExtensions [  
+      (import extensions/prim-char.nix {
+        inherit ghc;
+      })
+      (import extensions/prim-compat.nix {
+        inherit ghc;
+      })
+      (import extensions/prim-bool.nix {
+        inherit ghc;
+      })
+      (import extensions/prim-int.nix {
+        inherit ghc;
+      })
+      (import extensions/prim-ord.nix {
+        inherit ghc;
+      })
+      (import extensions/source-locations.nix {
+        inherit ghc;
+      })
+    ] pkgs pkgs;
 }
