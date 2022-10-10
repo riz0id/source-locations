@@ -58,7 +58,6 @@ common common
     -dsuppress-module-prefixes
     -dsuppress-uniques
 
-
   build-depends:
     , base >= 4.15.1 && < 4.17
 
@@ -82,7 +81,11 @@ library
     -- more iterations. 
     -fmax-simplifier-iterations=20
 
+  if flag(llvm)
+    ghc-options: -fllvm
+
   build-depends:
+    , deepseq
     , ghc-prim         >= 0.7.0  && < 0.9
     , prim-bool        >= 1.0.1  && < 1.1.0
     , prim-char        >= 1.0.0  && < 1.1.0
@@ -94,8 +97,8 @@ library
     Data.SrcLoc
     Data.SrcLoc.Prim
 
-  if flag(llvm)
-    ghc-options: -fllvm
+  other-modules:
+    Data.SrcLoc.Core
 
 test-suite test
   import:         common

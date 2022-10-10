@@ -1,6 +1,3 @@
-{-# LANGUAGE DataKinds #-}
-{-# LANGUAGE DeriveDataTypeable #-}
-{-# LANGUAGE ViewPatterns #-}
 {-# OPTIONS_HADDOCK show-extensions #-}
 
 -- |
@@ -16,90 +13,29 @@
 --
 -- @since 1.0.0
 module Data.SrcLoc
-  ( -- * Source Locations
-    SrcLoc (SrcLoc, posn, line, coln),
+  ( module Data.SrcLoc.Core,
 
     -- * Construction
     empty,
-    box,
-    unbox,
 
     -- * Basic Operations
     feed,
     diff,
+
+    -- * Show
+    format, 
+    formats,
   )
 where
 
-import Data.Bool.Prim qualified as Bool
-import Data.Data (Data)
-import Data.Ord.Prim (Eq# (..), Ord# (..), toOrdering)
-
 import GHC.Exts (Char (C#), Int (I#))
 
-import Text.Printf (PrintfArg, formatArg)
-import Text.Printf qualified as Text
-
 --------------------------------------------------------------------------------
 
-import Data.SrcLoc.Prim (SrcLoc# (SrcLoc#))
+import Data.SrcLoc.Core
 import Data.SrcLoc.Prim qualified as Prim
 
---------------------------------------------------------------------------------
-
--- | t'SrcLoc' is a location in a source file. Source locations are identified
--- by:
---
--- * The position (via 'Data.SrcLoc.posn') of the source location relative to
---   the beginning of the file.
---
--- * The line number (via 'Data.SrcLoc.line') at the source location position.
---
--- * The column (via 'Data.SrcLoc.coln') at the source location position.
---
--- @since 1.0.0
-data SrcLoc = SrcLoc
-  { posn :: {-# UNPACK #-} !Int
-  , line :: {-# UNPACK #-} !Int
-  , coln :: {-# UNPACK #-} !Int
-  }
-  deriving (Data, Show)
-
--- | @since 1.0.0
-instance Eq SrcLoc where
-  loc0 == loc1 = Bool.toBool (unbox loc0 ==# unbox loc1)
-  {-# INLINE (==) #-}
-
-  loc0 /= loc1 = Bool.toBool (unbox loc0 /=# unbox loc1)
-  {-# INLINE (/=) #-}
-
--- | @since 1.0.0
-instance Ord SrcLoc where
-  compare loc0 loc1 = toOrdering (compare# (unbox loc0) (unbox loc1))
-  {-# INLINE compare #-}
-
-  loc0 > loc1 = Bool.toBool (unbox loc0 ># unbox loc1)
-  {-# INLINE (>) #-}
-
-  loc0 >= loc1 = Bool.toBool (unbox loc0 >=# unbox loc1)
-  {-# INLINE (>=) #-}
-
-  loc0 < loc1 = Bool.toBool (unbox loc0 <# unbox loc1)
-  {-# INLINE (<) #-}
-
-  loc0 <= loc1 = Bool.toBool (unbox loc0 <=# unbox loc1)
-  {-# INLINE (<=) #-}
-
--- | @since 1.0.0
-instance PrintfArg SrcLoc where
-  formatArg loc fmt
-    | 's' == fmtChar = shows loc
-    | otherwise = Text.errorBadFormat fmtChar
-    where
-      fmtChar :: Char
-      fmtChar = Text.fmtChar fmt
-  {-# INLINE formatArg #-}
-
--- Construction ----------------------------------------------------------------
+-- SrcLoc - Construction -------------------------------------------------------
 
 -- | The empty source location, equivalent to:
 --
@@ -111,20 +47,6 @@ instance PrintfArg SrcLoc where
 empty :: SrcLoc
 empty = SrcLoc 0 1 1
 {-# INLINE CONLIKE empty #-}
-
--- | TODO 
--- 
--- @since 1.0.0
-box :: SrcLoc# -> SrcLoc
-box (SrcLoc# x# y# z#) = SrcLoc (I# x#) (I# y#) (I# z#)
-{-# INLINE CONLIKE box #-}
-
--- | TODO 
--- 
--- @since 1.0.0
-unbox :: SrcLoc -> SrcLoc#
-unbox (SrcLoc (I# x#) (I# y#) (I# z#)) = SrcLoc# x# y# z#
-{-# INLINE CONLIKE unbox #-}
 
 -- Basic Operations ------------------------------------------------------------
 
@@ -154,3 +76,20 @@ feed loc (C# chr#) = box (Prim.feed# (unbox loc) chr#)
 diff :: SrcLoc -> SrcLoc -> Int
 diff loc0 loc1 = I# (Prim.diff# (unbox loc0) (unbox loc1))
 {-# INLINE diff #-}
+
+-- Show ------------------------------------------------------------------------
+
+-- | TODO
+--
+-- >>> format (SrcLoc 5 2 8)
+-- "5:2:8"
+--
+-- @since 1.0.0
+format :: SrcLoc -> String 
+format loc = formats loc ""
+
+-- | TODO 
+--
+-- @since 1.0.0
+formats :: SrcLoc -> ShowS
+formats (SrcLoc ps ln cn) rest = shows ps (':' : shows ln (':' : shows cn rest))

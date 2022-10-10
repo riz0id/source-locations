@@ -30,7 +30,7 @@ import Data.Int.Prim qualified as Int
 import Data.Ord.Prim (Eq# (..), Ord# (..), Ordering# (EQ#, GT#, LT#))
 
 import GHC.Exts (Char#, Int (I#))
-import qualified GHC.Exts as GHC
+import GHC.Exts qualified as GHC
 
 import Language.Haskell.TH.Syntax (Exp, Lift, lift, liftTyped)
 import Language.Haskell.TH.Syntax qualified as TH
@@ -63,16 +63,16 @@ instance Eq# SrcLoc# where
 -- | @since 1.0.0
 instance Ord# SrcLoc# where
   compare# (SL# (# x0#, y0#, z0# #)) (SL# (# x1#, y1#, z1# #)) =
-    case compare# x0# x1# of 
-      EQ# -> case compare# y0# y1# of 
+    case compare# x0# x1# of
+      EQ# -> case compare# y0# y1# of
         EQ# -> compare# z0# z1#
         ord# -> ord#
       ord# -> ord#
   {-# INLINE compare# #-}
 
   SL# (# x0#, y0#, z0# #) ># SL# (# x1#, y1#, z1# #) =
-    case compare# x0# x1# of 
-      EQ# -> case compare# y0# y1# of 
+    case compare# x0# x1# of
+      EQ# -> case compare# y0# y1# of
         EQ# -> z0# ># z1#
         GT# -> T#
         LT# -> F#
@@ -84,8 +84,8 @@ instance Ord# SrcLoc# where
   {-# INLINE (>=#) #-}
 
   SL# (# x0#, y0#, z0# #) <# SL# (# x1#, y1#, z1# #) =
-    case compare# x0# x1# of 
-      EQ# -> case compare# y0# y1# of 
+    case compare# x0# x1# of
+      EQ# -> case compare# y0# y1# of
         EQ# -> z0# <# z1#
         GT# -> F#
         LT# -> T#
