@@ -70,7 +70,8 @@ feed :: SrcLoc -> Char -> SrcLoc
 feed loc (C# chr#) = box (Prim.feed# (unbox loc) chr#)
 {-# INLINE feed #-}
 
--- | Take the difference of two t'SrcLoc' source positions.
+-- | Calculate the difference between the 'posn' component of two source 
+-- locations.
 --
 -- @since 1.0.0
 diff :: SrcLoc -> SrcLoc -> Int
