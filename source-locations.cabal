@@ -85,7 +85,7 @@ library
     ghc-options: -fllvm
 
   build-depends:
-    , deepseq
+    , deepseq          >= 1.4.6 && < 1.5
     , ghc-prim         >= 0.7.0  && < 0.9
     , prim-bool        >= 1.0.1  && < 1.1.0
     , prim-char        >= 1.0.0  && < 1.1.0
