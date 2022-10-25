@@ -1,6 +1,7 @@
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveLift #-}
 {-# OPTIONS_HADDOCK show-extensions #-}
 
 -- |
@@ -32,6 +33,8 @@ import Data.Ord.Prim (Eq# (..), Ord# (..), toOrdering)
 import GHC.Exts (Int (I#))
 import GHC.Generics (Generic)
 
+import Language.Haskell.TH.Syntax (Lift)
+
 import Text.Printf (PrintfArg, formatArg)
 import Text.Printf qualified as Text
 
@@ -52,7 +55,7 @@ data SrcLoc = SrcLoc
   , coln :: {-# UNPACK #-} !Int
   -- ^ TODO
   }
-  deriving (Data, Generic, NFData, Show)
+  deriving (Data, Generic, NFData, Show, Lift)
 
 -- | @since 1.0.0
 instance Eq SrcLoc where

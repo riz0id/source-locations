@@ -1,6 +1,7 @@
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveLift #-}
 {-# OPTIONS_HADDOCK show-extensions #-}
 
 -- |
@@ -27,6 +28,8 @@ import Data.Data (Data)
 
 import GHC.Generics (Generic)
 
+import Language.Haskell.TH.Syntax (Lift)
+
 --------------------------------------------------------------------------------
 
 import Data.SrcLoc.Core (SrcLoc)
@@ -42,4 +45,4 @@ data SrcSpan = SrcSpan
   , end :: {-# UNPACK #-} !SrcLoc
   -- ^ TODO
   }
-  deriving (Data, Eq, Generic, NFData, Ord, Show)
+  deriving (Data, Eq, Generic, NFData, Ord, Show, Lift)
