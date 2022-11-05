@@ -19,14 +19,24 @@ module Data.SrcLoc
     empty,
 
     -- * Basic Operations
-    feed,
     diff,
+    
+    -- * Modification
+    nextColn,
+    nextLine,
+
+    -- * Feed 
+    feed,
+    feedsText,
 
     -- * Show
     format, 
     formats,
   )
 where
+
+import Data.Text (Text)
+import qualified Data.Text as Text
 
 import GHC.Exts (Char (C#), Int (I#))
 
@@ -52,6 +62,42 @@ empty = SrcLoc 0 1 1
 
 infixl 6 `diff`
 
+-- | Calculate the difference between the 'posn' component of two source 
+-- locations.
+--
+-- @since 1.0.0
+diff :: SrcLoc -> SrcLoc -> Int
+diff loc0 loc1 = I# (Prim.diff# (unbox loc0) (unbox loc1))
+{-# INLINE diff #-}
+
+-- Modification ----------------------------------------------------------------
+
+-- | Advances the given source location to the next column. The resulting source
+-- location will have:
+--
+-- * The 'posn' and 'coln' fields incremented by @1@.
+--
+-- * The same 'line' field as the original source location.
+--
+-- @since 1.0.0
+nextColn :: SrcLoc -> SrcLoc 
+nextColn loc = box (Prim.nextColn# (unbox loc)) 
+{-# INLINE nextColn #-}
+
+-- | Advances the given source location to the next line. The resulting source 
+-- location will have:
+--
+--   * The 'posn' and 'line' fields incremented by @1@.
+--
+--   * The 'coln' field reset to column @1@.
+--
+-- @since 1.0.0
+nextLine :: SrcLoc -> SrcLoc 
+nextLine loc = box (Prim.nextLine# (unbox loc)) 
+{-# INLINE nextLine #-}
+
+-- Feed 
+
 -- | "Feeds" a character to a t'SrcLoc'. This produces a new t'SrcLoc' with
 -- fields incremented according to the kind character the source location was
 -- fed.
@@ -70,13 +116,11 @@ feed :: SrcLoc -> Char -> SrcLoc
 feed loc (C# chr#) = box (Prim.feed# (unbox loc) chr#)
 {-# INLINE feed #-}
 
--- | Calculate the difference between the 'posn' component of two source 
--- locations.
+-- | TODO
 --
 -- @since 1.0.0
-diff :: SrcLoc -> SrcLoc -> Int
-diff loc0 loc1 = I# (Prim.diff# (unbox loc0) (unbox loc1))
-{-# INLINE diff #-}
+feedsText :: SrcLoc -> Text -> SrcLoc 
+feedsText = Text.foldl' feed
 
 -- Show ------------------------------------------------------------------------
 

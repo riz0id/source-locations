@@ -20,6 +20,8 @@ module Data.SrcLoc.Prim
 
     -- * Basic Operations
     feed#,
+    nextColn#,
+    nextLine#,
     diff#,
   )
 where
@@ -124,10 +126,10 @@ instance Lift SrcLoc# where
 --
 -- @since 1.0.0
 feed# :: SrcLoc# -> Char# -> SrcLoc#
-feed# (SrcLoc# p# l# c#) chr# =
+feed# loc# chr# =
   case '\n'# ==# chr# of
-    T# -> SrcLoc# (Int.addInt# 1# p#) (Int.addInt# 1# l#) 1#
-    F# -> SrcLoc# (Int.addInt# 1# p#) l# (Int.addInt# 1# c#)
+    T# -> nextLine# loc#
+    F# -> nextColn# loc#
 
 -- | Take the difference of two 'SrcLoc#' source positions.
 --
@@ -135,3 +137,17 @@ feed# (SrcLoc# p# l# c#) chr# =
 diff# :: SrcLoc# -> SrcLoc# -> Int#
 diff# (SrcLoc# x0# _ _) (SrcLoc# x1# _ _) = x1# GHC.-# x0#
 {-# INLINE diff# #-}
+
+-- Modification ----------------------------------------------------------------
+
+-- | TODO 
+--
+-- @since 1.0.0
+nextColn# :: SrcLoc# -> SrcLoc# 
+nextColn# (SrcLoc# p# l# c#) = SrcLoc# (Int.addInt# 1# p#) l# (Int.addInt# 1# c#)
+
+-- | TODO 
+--
+-- @since 1.0.0
+nextLine# :: SrcLoc# -> SrcLoc# 
+nextLine# (SrcLoc# p# l# _) = SrcLoc# (Int.addInt# 1# p#) (Int.addInt# 1# l#) 1#
