@@ -92,6 +92,7 @@ library
     , prim-int         >= 1.0.0  && < 1.1.0
     , prim-ord         >= 1.0.0  && < 1.1.0
     , template-haskell >= 2.17.0 && < 2.19
+    , text
 
   exposed-modules:
     Data.SrcLoc

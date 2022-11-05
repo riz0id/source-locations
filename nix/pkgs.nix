@@ -1,8 +1,6 @@
-{ ghc ? "ghc922" }:
+{ ghc }:
 
-let
-  nixpkgs = import ./nixpkgs.nix { };
-in import nixpkgs {
+import (import ./nixpkgs.nix) {
   config.packageOverrides = pkgs: 
     pkgs.lib.composeManyExtensions [  
       (import extensions/prim-char.nix {

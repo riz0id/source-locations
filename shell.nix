@@ -1,4 +1,4 @@
-{ ghc ? "ghc922" }:
+{ ghc ? "ghc924" }:
 
 let 
   pkgs = import ./default.nix { 
@@ -6,10 +6,6 @@ let
   };
 in pkgs.source-locations.env.overrideAttrs (self: {
   buildInputs = self.buildInputs ++ [ 
-    pkgs.cabal-install
-    pkgs.clang
-    pkgs.fourmolu
-    pkgs.haskell-language-server
-    pkgs.llvm
+
   ];
 })
