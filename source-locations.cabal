@@ -51,13 +51,6 @@ common common
     -Widentities
     -Wmissing-export-lists
 
-    -ddump-to-file
-    -ddump-stg-final
-    -ddump-simpl
-    -dppr-cols=120
-    -dsuppress-module-prefixes
-    -dsuppress-uniques
-
   build-depends:
     , base >= 4.15.1 && < 4.17
 
@@ -69,7 +62,7 @@ library
     -- `-j3` is set (as opposed to `-j`) due to the small number of modules that 
     -- are exported by this package. This can sometimes help speed up compile 
     -- times by reducing thread contention.
-    -j3
+    -j6
 
     -- This package does not benefit from higher specifying optimization levels
     -- such as `-O2`. 
