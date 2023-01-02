@@ -20,17 +20,18 @@ module Data.SrcLoc
 
     -- * Basic Operations
     diff,
-    
+
     -- * Modification
     nextColn,
     nextLine,
 
     -- * Feed 
     feed,
+    feeds,
     feedsText,
 
     -- * Show
-    format, 
+    format,
     formats,
   )
 where
@@ -44,6 +45,7 @@ import GHC.Exts (Char (C#), Int (I#))
 
 import Data.SrcLoc.Core
 import Data.SrcLoc.Prim qualified as Prim
+import Data.Foldable (foldl')
 
 -- SrcLoc - Construction -------------------------------------------------------
 
@@ -80,8 +82,8 @@ diff loc0 loc1 = I# (Prim.diff# (unbox loc0) (unbox loc1))
 -- * The same 'line' field as the original source location.
 --
 -- @since 1.0.0
-nextColn :: SrcLoc -> SrcLoc 
-nextColn loc = box (Prim.nextColn# (unbox loc)) 
+nextColn :: SrcLoc -> SrcLoc
+nextColn loc = box (Prim.nextColn# (unbox loc))
 {-# INLINE nextColn #-}
 
 -- | Advances the given source location to the next line. The resulting source 
@@ -92,11 +94,11 @@ nextColn loc = box (Prim.nextColn# (unbox loc))
 --   * The 'coln' field reset to column @1@.
 --
 -- @since 1.0.0
-nextLine :: SrcLoc -> SrcLoc 
-nextLine loc = box (Prim.nextLine# (unbox loc)) 
+nextLine :: SrcLoc -> SrcLoc
+nextLine loc = box (Prim.nextLine# (unbox loc))
 {-# INLINE nextLine #-}
 
--- Feed 
+-- Feed ------------------------------------------------------------------------
 
 -- | "Feeds" a character to a t'SrcLoc'. This produces a new t'SrcLoc' with
 -- fields incremented according to the kind character the source location was
@@ -116,10 +118,23 @@ feed :: SrcLoc -> Char -> SrcLoc
 feed loc (C# chr#) = box (Prim.feed# (unbox loc) chr#)
 {-# INLINE feed #-}
 
--- | TODO
+-- | The 'feeds' function updates a 'SrcLoc' according to the characters in a 
+-- given string by strictly folding 'feed' over the input string:
+--
+-- prop> feeds loc xs == foldl' feed loc xs
 --
 -- @since 1.0.0
-feedsText :: SrcLoc -> Text -> SrcLoc 
+feeds :: SrcLoc -> String -> SrcLoc
+feeds = foldl' feed
+{-# INLINE feeds #-}
+
+-- | Similar to 'feeds', but updates the fields of 'SrcLoc' by folding a 'Text'
+-- rather than a 'String'.
+--
+-- prop> feedsText loc xs == Text.foldl' feed loc xs
+--
+-- @since 1.0.0
+feedsText :: SrcLoc -> Text -> SrcLoc
 feedsText = Text.foldl' feed
 
 -- Show ------------------------------------------------------------------------
@@ -130,7 +145,7 @@ feedsText = Text.foldl' feed
 -- "5:2:8"
 --
 -- @since 1.0.0
-format :: SrcLoc -> String 
+format :: SrcLoc -> String
 format loc = formats loc ""
 
 -- | TODO 
