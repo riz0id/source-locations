@@ -1,7 +1,7 @@
-{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DeriveAnyClass     #-}
 {-# LANGUAGE DeriveDataTypeable #-}
-{-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE DeriveLift #-}
+{-# LANGUAGE DeriveGeneric      #-}
+{-# LANGUAGE DeriveLift         #-}
 {-# OPTIONS_HADDOCK show-extensions #-}
 
 -- |
@@ -18,17 +18,17 @@
 -- @since 1.0.0
 module Data.SrcLoc.Core
   ( -- * Source Locations
-    SrcLoc (SrcLoc, posn, line, coln),
-    box,
-    unbox,
-  )
-where
+    SrcLoc (SrcLoc, posn, line, coln)
+  , box
+  , unbox
+  ) where
 
 import Control.DeepSeq (NFData)
 
 import Data.Bool.Prim qualified as Bool
 import Data.Data (Data)
 import Data.Ord.Prim (Eq# (..), Ord# (..), toOrdering)
+import Data.SrcLoc.Prim (SrcLoc# (SrcLoc#))
 
 import GHC.Exts (Int (I#))
 import GHC.Generics (Generic)
@@ -40,22 +40,18 @@ import Text.Printf qualified as Text
 
 --------------------------------------------------------------------------------
 
-import Data.SrcLoc.Prim (SrcLoc# (SrcLoc#))
-
---------------------------------------------------------------------------------
-
 -- | TODO
 --
 -- @since 1.0.0
 data SrcLoc = SrcLoc
   { posn :: {-# UNPACK #-} !Int
-  -- ^ TODO
+    -- ^ TODO
   , line :: {-# UNPACK #-} !Int
-  -- ^ TODO
+    -- ^ TODO
   , coln :: {-# UNPACK #-} !Int
-  -- ^ TODO
+    -- ^ TODO
   }
-  deriving (Data, Generic, NFData, Show, Lift)
+  deriving (Data, Generic, Lift, NFData, Show)
 
 -- | @since 1.0.0
 instance Eq SrcLoc where

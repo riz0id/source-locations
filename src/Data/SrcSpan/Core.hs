@@ -1,7 +1,7 @@
-{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DeriveAnyClass     #-}
 {-# LANGUAGE DeriveDataTypeable #-}
-{-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE DeriveLift #-}
+{-# LANGUAGE DeriveGeneric      #-}
+{-# LANGUAGE DeriveLift         #-}
 {-# OPTIONS_HADDOCK show-extensions #-}
 
 -- |
@@ -18,21 +18,17 @@
 -- @since 1.0.0
 module Data.SrcSpan.Core
   ( -- * Source Spans
-    SrcSpan (SrcSpan, begin, end),
-  )
-where
+    SrcSpan (SrcSpan, begin, end)
+  ) where
 
 import Control.DeepSeq (NFData)
 
 import Data.Data (Data)
+import Data.SrcLoc.Core (SrcLoc)
 
 import GHC.Generics (Generic)
 
 import Language.Haskell.TH.Syntax (Lift)
-
---------------------------------------------------------------------------------
-
-import Data.SrcLoc.Core (SrcLoc)
 
 -- Source Spans ----------------------------------------------------------------
 
@@ -41,8 +37,8 @@ import Data.SrcLoc.Core (SrcLoc)
 -- @since 1.0.0
 data SrcSpan = SrcSpan
   { begin :: {-# UNPACK #-} !SrcLoc
-  -- ^ TODO
-  , end :: {-# UNPACK #-} !SrcLoc
-  -- ^ TODO
+    -- ^ TODO
+  , end   :: {-# UNPACK #-} !SrcLoc
+    -- ^ TODO
   }
-  deriving (Data, Eq, Generic, NFData, Ord, Show, Lift)
+  deriving (Data, Eq, Generic, Lift, NFData, Ord, Show)

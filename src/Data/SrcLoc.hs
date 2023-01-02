@@ -13,39 +13,30 @@
 --
 -- @since 1.0.0
 module Data.SrcLoc
-  ( module Data.SrcLoc.Core,
-
+  ( module Data.SrcLoc.Core
     -- * Construction
-    empty,
-
+  , empty
     -- * Basic Operations
-    diff,
-
+  , diff
     -- * Modification
-    nextColn,
-    nextLine,
-
-    -- * Feed 
-    feed,
-    feeds,
-    feedsText,
-
+  , nextColn
+  , nextLine
+    -- * Feed
+  , feed
+  , feeds
+  , feedsText
     -- * Show
-    format,
-    formats,
-  )
-where
+  , format
+  , formats
+  ) where
 
-import Data.Text (Text)
-import qualified Data.Text as Text
-
-import GHC.Exts (Char (C#), Int (I#))
-
---------------------------------------------------------------------------------
-
+import Data.Foldable (foldl')
 import Data.SrcLoc.Core
 import Data.SrcLoc.Prim qualified as Prim
-import Data.Foldable (foldl')
+import Data.Text (Text)
+import Data.Text qualified as Text
+
+import GHC.Exts (Char (C#), Int (I#))
 
 -- SrcLoc - Construction -------------------------------------------------------
 
@@ -64,7 +55,7 @@ empty = SrcLoc 0 1 1
 
 infixl 6 `diff`
 
--- | Calculate the difference between the 'posn' component of two source 
+-- | Calculate the difference between the 'posn' component of two source
 -- locations.
 --
 -- @since 1.0.0
@@ -86,7 +77,7 @@ nextColn :: SrcLoc -> SrcLoc
 nextColn loc = box (Prim.nextColn# (unbox loc))
 {-# INLINE nextColn #-}
 
--- | Advances the given source location to the next line. The resulting source 
+-- | Advances the given source location to the next line. The resulting source
 -- location will have:
 --
 --   * The 'posn' and 'line' fields incremented by @1@.
@@ -118,7 +109,7 @@ feed :: SrcLoc -> Char -> SrcLoc
 feed loc (C# chr#) = box (Prim.feed# (unbox loc) chr#)
 {-# INLINE feed #-}
 
--- | The 'feeds' function updates a 'SrcLoc' according to the characters in a 
+-- | The 'feeds' function updates a 'SrcLoc' according to the characters in a
 -- given string by strictly folding 'feed' over the input string:
 --
 -- prop> feeds loc xs == foldl' feed loc xs
@@ -148,7 +139,7 @@ feedsText = Text.foldl' feed
 format :: SrcLoc -> String
 format loc = formats loc ""
 
--- | TODO 
+-- | TODO
 --
 -- @since 1.0.0
 formats :: SrcLoc -> ShowS

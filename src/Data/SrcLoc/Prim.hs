@@ -1,4 +1,8 @@
-{-# LANGUAGE UnliftedNewtypes #-}
+{-# LANGUAGE DataKinds                #-}
+{-# LANGUAGE GADTSyntax               #-}
+{-# LANGUAGE KindSignatures           #-}
+{-# LANGUAGE StandaloneKindSignatures #-}
+{-# LANGUAGE UnliftedNewtypes         #-}
 {-# OPTIONS_HADDOCK show-extensions #-}
 
 -- |
@@ -16,22 +20,20 @@
 -- @since 1.0.0
 module Data.SrcLoc.Prim
   ( -- * Source Locations
-    SrcLoc# (SL#, SrcLoc#, posn#, line#, coln#),
-
+    SrcLoc# (SL#, SrcLoc#, posn#, line#, coln#)
     -- * Basic Operations
-    feed#,
-    nextColn#,
-    nextLine#,
-    diff#,
-  )
-where
+  , feed#
+  , nextColn#
+  , nextLine#
+  , diff#
+  ) where
 
 import Data.Bool.Prim (Bool# (F#, T#), and#, or#)
 import Data.Int.Prim (Int#)
 import Data.Int.Prim qualified as Int
 import Data.Ord.Prim (Eq# (..), Ord# (..), Ordering# (EQ#, GT#, LT#))
 
-import GHC.Exts (Char#, Int (I#))
+import GHC.Exts (Char#, Int (I#), RuntimeRep (..), TYPE)
 import GHC.Exts qualified as GHC
 
 import Language.Haskell.TH.Syntax (Exp, Lift, lift, liftTyped)
@@ -39,10 +41,17 @@ import Language.Haskell.TH.Syntax qualified as TH
 
 --------------------------------------------------------------------------------
 
+-- | TODO
+--
+-- @since 1.0.0
+type SrcLocRep :: RuntimeRep 
+type SrcLocRep = 'TupleRep '[ 'IntRep, 'IntRep, 'IntRep ]
+
 -- | t'SrcLoc#' is an unboxed source location.
 --
 -- @since 1.0.0
-newtype SrcLoc# = SL# (# Int#, Int#, Int# #)
+newtype SrcLoc# :: TYPE SrcLocRep where 
+  SL# :: (# Int#, Int#, Int# #) -> SrcLoc#
 
 -- | TODO
 --
@@ -67,7 +76,7 @@ instance Ord# SrcLoc# where
   compare# (SL# (# x0#, y0#, z0# #)) (SL# (# x1#, y1#, z1# #)) =
     case compare# x0# x1# of
       EQ# -> case compare# y0# y1# of
-        EQ# -> compare# z0# z1#
+        EQ#  -> compare# z0# z1#
         ord# -> ord#
       ord# -> ord#
   {-# INLINE compare# #-}
@@ -140,14 +149,14 @@ diff# (SrcLoc# x0# _ _) (SrcLoc# x1# _ _) = x1# GHC.-# x0#
 
 -- Modification ----------------------------------------------------------------
 
--- | TODO 
+-- | TODO
 --
 -- @since 1.0.0
-nextColn# :: SrcLoc# -> SrcLoc# 
+nextColn# :: SrcLoc# -> SrcLoc#
 nextColn# (SrcLoc# p# l# c#) = SrcLoc# (Int.addInt# 1# p#) l# (Int.addInt# 1# c#)
 
--- | TODO 
+-- | TODO
 --
 -- @since 1.0.0
-nextLine# :: SrcLoc# -> SrcLoc# 
+nextLine# :: SrcLoc# -> SrcLoc#
 nextLine# (SrcLoc# p# l# _) = SrcLoc# (Int.addInt# 1# p#) (Int.addInt# 1# l#) 1#

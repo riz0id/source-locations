@@ -13,28 +13,22 @@
 --
 -- @since 1.0.0
 module Data.SrcSpan
-  ( module Data.SrcSpan.Core,
-
+  ( module Data.SrcSpan.Core
     -- * Construction
-    empty,
-    fromSrcLoc,
-
+  , empty
+  , fromSrcLoc
     -- * Basic Operations
-    diff,
-
+  , diff
     -- * Show
-    format, 
-    formats,
-  )
-where
+  , format
+  , formats
+  ) where
+
+import Data.SrcLoc qualified as SrcLoc
+import Data.SrcLoc.Core (SrcLoc)
+import Data.SrcSpan.Core
 
 import Prelude hiding (span)
-
---------------------------------------------------------------------------------
-
-import Data.SrcLoc.Core ( SrcLoc )
-import Data.SrcLoc qualified as SrcLoc
-import Data.SrcSpan.Core
 
 -- SrcLoc - Construction -------------------------------------------------------
 
@@ -49,11 +43,11 @@ empty :: SrcSpan
 empty = fromSrcLoc SrcLoc.empty
 {-# INLINE CONLIKE empty #-}
 
--- | Converts a given source location @loc@ into a source span. The resulting 
+-- | Converts a given source location @loc@ into a source span. The resulting
 -- source span will 'begin' and 'end' at the location @loc@.
 --
 -- @
--- 'fromSrcLoc' loc == 'SrcSpan' loc loc 
+-- 'fromSrcLoc' loc == 'SrcSpan' loc loc
 -- @
 --
 -- @since 1.0.0
@@ -63,8 +57,8 @@ fromSrcLoc loc = SrcSpan loc loc
 
 -- Basic Operations ------------------------------------------------------------
 
--- | Similar to 'SrcLoc.diff' defined by "Data.SrcLoc", but uses the 'begin' and 
--- 'end' source locations of the given source span when calculating the 
+-- | Similar to 'SrcLoc.diff' defined by "Data.SrcLoc", but uses the 'begin' and
+-- 'end' source locations of the given source span when calculating the
 -- difference in the source locations 'SrcLoc.posn' component.
 --
 -- @
@@ -93,4 +87,4 @@ format span = formats span ""
 --
 -- @since 1.0.0
 formats :: SrcSpan -> ShowS
-formats (SrcSpan loc0 loc1) rest = SrcLoc.formats loc0 ('-' : SrcLoc.formats loc1 rest) 
+formats (SrcSpan loc0 loc1) rest = SrcLoc.formats loc0 ('-' : SrcLoc.formats loc1 rest)
