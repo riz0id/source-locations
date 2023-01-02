@@ -1,4 +1,4 @@
-{ ghc ? "ghc924" }:
+{ ghc ? "ghc942" }:
 
 let 
   pkgs = import ./default.nix { 
