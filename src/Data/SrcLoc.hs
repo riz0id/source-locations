@@ -20,7 +20,9 @@ module Data.SrcLoc
   , diff
     -- * Modification
   , nextColn
+  , nextColns
   , nextLine
+  , nextLines
     -- * Feed
   , feed
   , feeds
@@ -77,6 +79,18 @@ nextColn :: SrcLoc -> SrcLoc
 nextColn loc = box (Prim.nextColn# (unbox loc))
 {-# INLINE nextColn #-}
 
+-- | Advances the given source location's column by @n@. The resulting source
+-- location will have:
+--
+-- * The 'posn' and 'coln' fields incremented by @n@.
+--
+-- * The same 'line' field as the original source location.
+--
+-- @since 1.0.0
+nextColns :: SrcLoc -> Int -> SrcLoc
+nextColns loc (I# n#) = box (Prim.nextColns# (unbox loc) n#)
+{-# INLINE nextColns #-}
+
 -- | Advances the given source location to the next line. The resulting source
 -- location will have:
 --
@@ -88,6 +102,18 @@ nextColn loc = box (Prim.nextColn# (unbox loc))
 nextLine :: SrcLoc -> SrcLoc
 nextLine loc = box (Prim.nextLine# (unbox loc))
 {-# INLINE nextLine #-}
+
+-- | Advances the given source location's line by @n@. The resulting source
+-- location will have:
+--
+--   * The 'posn' and 'line' fields incremented by @n@.
+--
+--   * The 'coln' field reset to column @1@.
+--
+-- @since 1.0.0
+nextLines :: SrcLoc -> Int -> SrcLoc
+nextLines loc (I# n#) = box (Prim.nextLines# (unbox loc) n#)
+{-# INLINE nextLines #-}
 
 -- Feed ------------------------------------------------------------------------
 

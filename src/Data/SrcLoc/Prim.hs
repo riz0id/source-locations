@@ -1,3 +1,4 @@
+{-# LANGUAGE BangPatterns             #-}
 {-# LANGUAGE DataKinds                #-}
 {-# LANGUAGE GADTSyntax               #-}
 {-# LANGUAGE KindSignatures           #-}
@@ -21,11 +22,17 @@
 module Data.SrcLoc.Prim
   ( -- * Source Locations
     SrcLoc# (SL#, SrcLoc#, posn#, line#, coln#)
+    -- * Representation
+  , SrcLocRep
     -- * Basic Operations
-  , feed#
-  , nextColn#
-  , nextLine#
   , diff#
+    -- * Modification
+  , nextColn#
+  , nextColns#
+  , nextLine#
+  , nextLines#
+    -- * Feed
+  , feed#
   ) where
 
 import Data.Bool.Prim (Bool# (F#, T#), and#, or#)
@@ -41,17 +48,17 @@ import Language.Haskell.TH.Syntax qualified as TH
 
 --------------------------------------------------------------------------------
 
--- | TODO
---
--- @since 1.0.0
-type SrcLocRep :: RuntimeRep 
-type SrcLocRep = 'TupleRep '[ 'IntRep, 'IntRep, 'IntRep ]
-
 -- | t'SrcLoc#' is an unboxed source location.
 --
 -- @since 1.0.0
 newtype SrcLoc# :: TYPE SrcLocRep where 
   SL# :: (# Int#, Int#, Int# #) -> SrcLoc#
+
+-- | TODO
+--
+-- @since 1.0.0
+type SrcLocRep :: RuntimeRep 
+type SrcLocRep = 'TupleRep '[ 'IntRep, 'IntRep, 'IntRep ]
 
 -- | TODO
 --
@@ -153,10 +160,28 @@ diff# (SrcLoc# x0# _ _) (SrcLoc# x1# _ _) = x1# GHC.-# x0#
 --
 -- @since 1.0.0
 nextColn# :: SrcLoc# -> SrcLoc#
-nextColn# (SrcLoc# p# l# c#) = SrcLoc# (Int.addInt# 1# p#) l# (Int.addInt# 1# c#)
+nextColn# loc# = nextColns# loc# 1# 
+
+-- | TODO
+--
+-- @since 1.0.0
+nextColns# :: SrcLoc# -> Int# -> SrcLoc#
+nextColns# (SrcLoc# p0# l# c0#) n# = 
+  let !p1# = Int.addInt# n# p0# 
+      !c1# = Int.addInt# n# c0# 
+   in SrcLoc# p1# l# c1# 
 
 -- | TODO
 --
 -- @since 1.0.0
 nextLine# :: SrcLoc# -> SrcLoc#
-nextLine# (SrcLoc# p# l# _) = SrcLoc# (Int.addInt# 1# p#) (Int.addInt# 1# l#) 1#
+nextLine# loc# = nextLines# loc# 1#
+
+-- | TODO
+--
+-- @since 1.0.0
+nextLines# :: SrcLoc# -> Int# -> SrcLoc#
+nextLines# (SrcLoc# p0# l0# c#) n# = 
+  let !p1# = Int.addInt# n# p0# 
+      !l1# = Int.addInt# n# l0# 
+   in SrcLoc# p1# l1# c# 
