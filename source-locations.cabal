@@ -78,14 +78,15 @@ library
     ghc-options: -fllvm
 
   build-depends:
-    , deepseq
+    , deepseq          >= 1.4.6  && < 1.5
     , ghc-prim         >= 0.7.0  && < 0.10
+    , lens             >= 5.2.1  && < 5.3
     , prim-bool        >= 1.0.0  && < 1.1.0
     , prim-char        >= 1.0.0  && < 1.1.0
     , prim-int         >= 1.0.0  && < 1.1.0
     , prim-ord         >= 1.0.0  && < 1.1.0
     , template-haskell >= 2.17.0 && < 2.20
-    , text
+    , text             >= 1.2.5  && < 1.3
 
   exposed-modules:
     Data.SrcLoc
@@ -93,7 +94,6 @@ library
     Data.SrcSpan
 
   other-modules:
-    Data.SrcLoc.Core
     Data.SrcSpan.Core
 
 test-suite test

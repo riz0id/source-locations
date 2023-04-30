@@ -1,10 +1,10 @@
 - arguments: [
-  --color, 
-  -XMagicHash,
-  -XUnboxedTuples,
-  -XUnliftedNewtypes,
-  -XViewPatterns,
-]
+    --color, 
+    -XMagicHash,
+    -XUnboxedTuples,
+    -XUnliftedNewtypes,
+    -XViewPatterns,
+  ]
 
 - extensions:
   - default: true
@@ -55,20 +55,20 @@
 
     rules: 
     - warn: {
-      name: "Use Data.SrcLoc.diff",
-      lhs: posn y - posn x,
-      rhs: diff x y,
-    }
+        name: "Use Data.SrcLoc.diff",
+        lhs: posn y - posn x,
+        rhs: diff x y,
+      }
     - warn: {
-      name: "Use Data.SrcLoc.Prim.diff#",
-      lhs: posn# y - posn# x,
-      rhs: diff# x y,
-    }
+        name: "Use Data.SrcLoc.Prim.diff#",
+        lhs: posn# y - posn# x,
+        rhs: diff# x y,
+      }
     - warn: {
-      name: "Use Data.SrcLoc.empty",
-      lhs: SrcLoc 0 1 1,
-      rhs: empty,
-    }
+        name: "Use Data.SrcLoc.defaultSrcLoc",
+        lhs: SrcLoc 0 1 1,
+        rhs: defaultSrcLoc,
+      }
 
 # ==============================================================================
 # hlint configuration

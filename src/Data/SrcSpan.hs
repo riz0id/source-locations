@@ -15,7 +15,7 @@
 module Data.SrcSpan
   ( module Data.SrcSpan.Core
     -- * Construction
-  , empty
+  , defaultSrcSpan
   , fromSrcLoc
     -- * Basic Operations
   , diff
@@ -24,24 +24,24 @@ module Data.SrcSpan
   , formats
   ) where
 
+import Data.SrcLoc (SrcLoc)
 import Data.SrcLoc qualified as SrcLoc
-import Data.SrcLoc.Core (SrcLoc)
 import Data.SrcSpan.Core
 
 import Prelude hiding (span)
 
 -- SrcLoc - Construction -------------------------------------------------------
 
--- | The empty source span.
+-- | The default source span.
 --
 -- @
--- 'empty' == 'SrcSpan' 'SrcLoc.empty' 'SrcLoc.empty'
+-- 'defaultSrcSpan' == 'SrcSpan' 'SrcLoc.defaultSrcLoc' 'SrcLoc.defaultSrcLoc'
 -- @
 --
 -- @since 1.0.0
-empty :: SrcSpan
-empty = fromSrcLoc SrcLoc.empty
-{-# INLINE CONLIKE empty #-}
+defaultSrcSpan :: SrcSpan
+defaultSrcSpan = fromSrcLoc SrcLoc.defaultSrcLoc
+{-# INLINE CONLIKE defaultSrcSpan #-}
 
 -- | Converts a given source location @loc@ into a source span. The resulting
 -- source span will 'begin' and 'end' at the location @loc@.

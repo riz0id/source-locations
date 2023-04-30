@@ -6,6 +6,8 @@ let
   };
 in {
   inherit (pkgs.haskell.packages."${ghc}") 
-    source-locations;
+    haskell-language-server
+    source-locations
+    stylish-haskell;
 }
 

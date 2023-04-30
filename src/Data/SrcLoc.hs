@@ -1,4 +1,8 @@
 {-# OPTIONS_HADDOCK show-extensions #-}
+{-# LANGUAGE BlockArguments     #-}
+{-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE DeriveGeneric      #-}
+{-# LANGUAGE DeriveLift         #-}
 
 -- |
 -- Module      :  Data.SrcLoc
@@ -13,47 +17,132 @@
 --
 -- @since 1.0.0
 module Data.SrcLoc
-  ( module Data.SrcLoc.Core
-    -- * Construction
-  , empty
-    -- * Basic Operations
+  ( -- * SrcLoc
+    SrcLoc (..)
+    -- ** Construction
+  , defaultSrcLoc
+    -- ** Basic Operations
   , diff
-    -- * Modification
+    -- ** Lenses
+  , srcLocPosn
+  , srcLocLine
+  , srcLocColn
+    -- ** Modification
   , nextColn
   , nextColns
   , nextLine
   , nextLines
-    -- * Feed
+    -- ** Feed
   , feed
   , feeds
   , feedsText
-    -- * Show
+    -- ** Show
   , format
   , formats
   ) where
 
+import Control.DeepSeq (NFData)
+import Control.Lens (Lens', lens)
+
+import Data.Bool.Prim qualified as Bool
+import Data.Data (Data)
 import Data.Foldable (foldl')
-import Data.SrcLoc.Core
+import Data.Ord.Prim qualified as Ord
+import Data.SrcLoc.Prim (SrcLoc# (..))
 import Data.SrcLoc.Prim qualified as Prim
 import Data.Text (Text)
 import Data.Text qualified as Text
 
-import GHC.Exts (Char (C#), Int (I#))
+import GHC.Exts (Char (..), Int (..))
+import GHC.Generics (Generic)
+
+import Language.Haskell.TH.Syntax (Lift)
+
+import Text.Printf (PrintfArg)
+import Text.Printf qualified as Printf
+
+-- SrcLoc ----------------------------------------------------------------------
+
+-- | The 'SrcLoc' record is a location inside some file. Source locations are
+-- represented as a position, line number, and column number triple.
+--
+-- @since 1.0.0
+data SrcLoc = SrcLoc
+  { posn :: {-# UNPACK #-} !Int
+    -- ^ TODO: docs
+  , line :: {-# UNPACK #-} !Int
+    -- ^ TODO: docs
+  , coln :: {-# UNPACK #-} !Int
+    -- ^ TODO: docs
+  }
+  deriving (Data, Generic, Lift, Show)
+
+-- | @since 1.0.0
+instance Eq SrcLoc where
+  loc0 == loc1 = Bool.toBool (unbox loc0 Ord.==# unbox loc1)
+  {-# INLINE (==) #-}
+
+  loc0 /= loc1 = Bool.toBool (unbox loc0 Ord./=# unbox loc1)
+  {-# INLINE (/=) #-}
+
+-- | @since 1.0.0
+instance Ord SrcLoc where
+  compare loc0 loc1 = Ord.toOrdering (Ord.compare# (unbox loc0) (unbox loc1))
+  {-# INLINE compare #-}
+
+  loc0 > loc1 = Bool.toBool (unbox loc0 Ord.># unbox loc1)
+  {-# INLINE (>) #-}
+
+  loc0 >= loc1 = Bool.toBool (unbox loc0 Ord.>=# unbox loc1)
+  {-# INLINE (>=) #-}
+
+  loc0 < loc1 = Bool.toBool (unbox loc0 Ord.<# unbox loc1)
+  {-# INLINE (<) #-}
+
+  loc0 <= loc1 = Bool.toBool (unbox loc0 Ord.<=# unbox loc1)
+  {-# INLINE (<=) #-}
+
+-- | @since 1.0.0
+instance NFData SrcLoc
+
+-- | @since 1.0.0
+instance PrintfArg SrcLoc where
+  formatArg loc fmt
+    | 's' == fmtChar = shows loc
+    | otherwise = Printf.errorBadFormat fmtChar
+    where
+      fmtChar :: Char
+      fmtChar = Printf.fmtChar fmt
+  {-# INLINE formatArg #-}
+
+-- | TODO
+--
+-- @since 1.0.0
+box :: SrcLoc# -> SrcLoc
+box (SrcLoc# x# y# z#) = SrcLoc (I# x#) (I# y#) (I# z#)
+{-# INLINE CONLIKE box #-}
+
+-- | TODO
+--
+-- @since 1.0.0
+unbox :: SrcLoc -> SrcLoc#
+unbox (SrcLoc (I# x#) (I# y#) (I# z#)) = SrcLoc# x# y# z#
+{-# INLINE CONLIKE unbox #-}
 
 -- SrcLoc - Construction -------------------------------------------------------
 
--- | The empty source location, equivalent to:
+-- | The default source location, equivalent to:
 --
 -- @
--- 'empty' == v'SrcLoc' 0 1 1
+-- 'defaultSrcLoc' == v'SrcLoc' 0 1 1
 -- @
 --
 -- @since 1.0.0
-empty :: SrcLoc
-empty = SrcLoc 0 1 1
-{-# INLINE CONLIKE empty #-}
+defaultSrcLoc :: SrcLoc
+defaultSrcLoc = SrcLoc 0 1 1
+{-# INLINE CONLIKE defaultSrcLoc #-}
 
--- Basic Operations ------------------------------------------------------------
+-- SrcLoc - Basic Operations ---------------------------------------------------
 
 infixl 6 `diff`
 
@@ -65,10 +154,72 @@ diff :: SrcLoc -> SrcLoc -> Int
 diff loc0 loc1 = I# (Prim.diff# (unbox loc0) (unbox loc1))
 {-# INLINE diff #-}
 
--- Modification ----------------------------------------------------------------
+-- srcloc - feed ---------------------------------------------------------------
 
--- | Advances the given source location to the next column. The resulting source
--- location will have:
+-- | "Feeds" a character to a t'SrcLoc'. This produces a new t'SrcLoc' with
+-- fields incremented according to the kind character the source location was
+-- fed.
+--
+-- * For a newline character the position and line number fields are
+--   incremented. The columnn field is set to @1@.
+--
+-- * For any character that is not a newline character, the position and
+--   column number fields are increment. The line number is left unmodified.
+--
+-- >>> foldl feed empty "abc \n xyz"
+-- SrcLoc 9 2 5
+--
+-- @since 1.0.0
+feed :: SrcLoc -> Char -> SrcLoc
+feed loc (C# chr#) = box (Prim.feed# (unbox loc) chr#)
+{-# INLINE feed #-}
+
+-- | The 'feeds' function updates a 'SrcLoc' according to the characters in a
+-- given string by strictly folding 'feed' over the input string:
+--
+-- prop> feeds loc xs == foldl' feed loc xs
+--
+-- @since 1.0.0
+feeds :: SrcLoc -> String -> SrcLoc
+feeds = foldl' feed
+{-# INLINE feeds #-}
+
+-- | Similar to 'feeds', but updates the fields of 'SrcLoc' by folding a 'Text'
+-- rather than a 'String'.
+--
+-- prop> feedsText loc xs == Text.foldl' feed loc xs
+--
+-- @since 1.0.0
+feedsText :: SrcLoc -> Text -> SrcLoc
+feedsText = Text.foldl' feed
+
+-- SrcLoc - Lenses -------------------------------------------------------------
+
+-- | Lens focusing on the 'posn' field of 'SrcLoc'.
+--
+-- @since 1.0.0
+srcLocPosn :: Lens' SrcLoc Int
+srcLocPosn = lens posn \s x -> s { posn = x }
+{-# INLINE srcLocPosn #-}
+
+-- | Lens focusing on the 'line' field of 'SrcLoc'.
+--
+-- @since 1.0.0
+srcLocLine :: Lens' SrcLoc Int
+srcLocLine = lens line \s x -> s { line = x }
+{-# INLINE srcLocLine #-}
+
+-- | Lens focusing on the 'coln' field of 'SrcLoc'.
+--
+-- @since 1.0.0
+srcLocColn :: Lens' SrcLoc Int
+srcLocColn = lens coln \s x -> s { coln = x }
+{-# INLINE srcLocColn #-}
+
+-- SrcLoc - Modification -------------------------------------------------------
+
+-- | Advances the given source location to the next column. The resulting
+-- source location will have:
 --
 -- * The 'posn' and 'coln' fields incremented by @1@.
 --
@@ -115,46 +266,7 @@ nextLines :: SrcLoc -> Int -> SrcLoc
 nextLines loc (I# n#) = box (Prim.nextLines# (unbox loc) n#)
 {-# INLINE nextLines #-}
 
--- Feed ------------------------------------------------------------------------
-
--- | "Feeds" a character to a t'SrcLoc'. This produces a new t'SrcLoc' with
--- fields incremented according to the kind character the source location was
--- fed.
---
--- * For a newline character the position and line number fields are
---   incremented. The columnn field is set to @1@.
---
--- * For any character that is not a newline character, the position and
---   column number fields are increment. The line number is left unmodified.
---
--- >>> foldl feed empty "abc \n xyz"
--- SrcLoc 9 2 5
---
--- @since 1.0.0
-feed :: SrcLoc -> Char -> SrcLoc
-feed loc (C# chr#) = box (Prim.feed# (unbox loc) chr#)
-{-# INLINE feed #-}
-
--- | The 'feeds' function updates a 'SrcLoc' according to the characters in a
--- given string by strictly folding 'feed' over the input string:
---
--- prop> feeds loc xs == foldl' feed loc xs
---
--- @since 1.0.0
-feeds :: SrcLoc -> String -> SrcLoc
-feeds = foldl' feed
-{-# INLINE feeds #-}
-
--- | Similar to 'feeds', but updates the fields of 'SrcLoc' by folding a 'Text'
--- rather than a 'String'.
---
--- prop> feedsText loc xs == Text.foldl' feed loc xs
---
--- @since 1.0.0
-feedsText :: SrcLoc -> Text -> SrcLoc
-feedsText = Text.foldl' feed
-
--- Show ------------------------------------------------------------------------
+-- SrcLoc - Show ---------------------------------------------------------------
 
 -- | TODO
 --

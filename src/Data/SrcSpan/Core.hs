@@ -24,7 +24,7 @@ module Data.SrcSpan.Core
 import Control.DeepSeq (NFData)
 
 import Data.Data (Data)
-import Data.SrcLoc.Core (SrcLoc)
+import Data.SrcLoc (SrcLoc)
 
 import GHC.Generics (Generic)
 
