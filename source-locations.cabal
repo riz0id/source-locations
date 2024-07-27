@@ -3,9 +3,9 @@ cabal-version: 2.4
 name:        source-locations
 category:    Data
 version:     1.0.0
-synopsis:    Create and manipulate source file locations.  
-description: 
-  This packages provides the 'SrcLoc' type for representing source locations 
+synopsis:    Create and manipulate source file locations.
+description:
+  This packages provides the 'SrcLoc' type for representing source locations
   along with basic operations for creating and manipulating source locations.
 
 author:       jacob leach
@@ -28,7 +28,7 @@ source-repository head
   location: https://github.com/riz0id/source-locations
 
 flag lens
-  Description: Compile definitions and dependencies for lenses. 
+  Description: Compile definitions and dependencies for lenses.
   Default:     False
   Manual:      True
 
@@ -41,7 +41,7 @@ common common
   default-language: Haskell2010
 
   default-extensions:
-    ImportQualifiedPost MagicHash PatternSynonyms TemplateHaskellQuotes 
+    ImportQualifiedPost MagicHash PatternSynonyms TemplateHaskellQuotes
     UnboxedTuples
 
   ghc-options:
@@ -52,41 +52,41 @@ common common
     -Wmissing-export-lists
 
   build-depends:
-    , base >= 4.15.1 && < 4.18
+    , base >= 4.15.1 && < 4.20
 
 library
   import:         common
   hs-source-dirs: src
 
   ghc-options:
-    -- `-j3` is set (as opposed to `-j`) due to the small number of modules that 
-    -- are exported by this package. This can sometimes help speed up compile 
+    -- `-j3` is set (as opposed to `-j`) due to the small number of modules that
+    -- are exported by this package. This can sometimes help speed up compile
     -- times by reducing thread contention.
     -j6
 
     -- This package does not benefit from higher specifying optimization levels
-    -- such as `-O2`. 
+    -- such as `-O2`.
     -O2
 
-    -- `-fmax-simplifier-iterations` is set to keep compile times in check. 
-    -- Most definitions in this package have had manual w/w transformations 
+    -- `-fmax-simplifier-iterations` is set to keep compile times in check.
+    -- Most definitions in this package have had manual w/w transformations
     -- applied, leaving little room for the simplifier to make improvements with
-    -- more iterations. 
+    -- more iterations.
     -fmax-simplifier-iterations=20
 
   if flag(llvm)
     ghc-options: -fllvm
 
   build-depends:
-    , deepseq          >= 1.4.6  && < 1.5
-    , ghc-prim         >= 0.7.0  && < 0.10
+    , deepseq          >= 1.4.6  && < 1.6
+    , ghc-prim         >= 0.7.0  && < 0.12
     , lens             >= 5.2.1  && < 5.3
     , prim-bool        >= 1.0.0  && < 1.1.0
     , prim-char        >= 1.0.0  && < 1.1.0
     , prim-int         >= 1.0.0  && < 1.1.0
     , prim-ord         >= 1.0.0  && < 1.1.0
-    , template-haskell >= 2.17.0 && < 2.20
-    , text             >= 1.2.5  && < 1.3
+    , template-haskell >= 2.17.0 && < 2.22
+    , text             >= 1.2.5  && < 2.2
 
   exposed-modules:
     Data.SrcLoc
@@ -103,7 +103,7 @@ test-suite test
   main-is:        Test.hs
 
   default-extensions:
-    BlockArguments 
+    BlockArguments
 
   ghc-options:
     -threaded
@@ -114,9 +114,9 @@ test-suite test
     , hedgehog
     , source-locations
     , tasty
-    , tasty-hedgehog 
+    , tasty-hedgehog
 
-  other-modules: 
+  other-modules:
     Test.Compat
     Test.Core
     Test.SrcLoc
