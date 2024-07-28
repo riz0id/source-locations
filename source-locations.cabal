@@ -78,6 +78,7 @@ library
     ghc-options: -fllvm
 
   build-depends:
+    , bytestring
     , deepseq          >= 1.4.6  && < 1.6
     , ghc-prim         >= 0.7.0  && < 0.12
     , lens             >= 5.2.1  && < 5.3

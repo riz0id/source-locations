@@ -36,6 +36,7 @@ module Data.SrcLoc
   , feed
   , feeds
   , feedsText
+  , feedsByteString
     -- ** Show
   , format
   , formats
@@ -45,6 +46,8 @@ import Control.DeepSeq (NFData)
 import Control.Lens (Lens', lens)
 
 import Data.Bool.Prim qualified as Bool
+import Data.ByteString (ByteString)
+import Data.ByteString.Char8 qualified as ByteString
 import Data.Data (Data)
 import Data.Foldable (foldl')
 import Data.Ord.Prim qualified as Ord
@@ -69,11 +72,11 @@ import Text.Printf qualified as Printf
 -- @since 1.0.0
 data SrcLoc = SrcLoc
   { posn :: {-# UNPACK #-} !Int
-    -- ^ TODO: docs
+    -- ^ The offset of the 'SrcLoc'.
   , line :: {-# UNPACK #-} !Int
-    -- ^ TODO: docs
+    -- ^ The line number that the offset of the 'SrcLoc' is on.
   , coln :: {-# UNPACK #-} !Int
-    -- ^ TODO: docs
+    -- ^ The column that the offset of the 'SrcLoc' is on.
   }
   deriving (Data, Generic, Lift, Show)
 
@@ -115,16 +118,10 @@ instance PrintfArg SrcLoc where
       fmtChar = Printf.fmtChar fmt
   {-# INLINE formatArg #-}
 
--- | TODO
---
--- @since 1.0.0
 box :: SrcLoc# -> SrcLoc
 box (SrcLoc# x# y# z#) = SrcLoc (I# x#) (I# y#) (I# z#)
 {-# INLINE CONLIKE box #-}
 
--- | TODO
---
--- @since 1.0.0
 unbox :: SrcLoc -> SrcLoc#
 unbox (SrcLoc (I# x#) (I# y#) (I# z#)) = SrcLoc# x# y# z#
 {-# INLINE CONLIKE unbox #-}
@@ -184,14 +181,23 @@ feeds :: SrcLoc -> String -> SrcLoc
 feeds = foldl' feed
 {-# INLINE feeds #-}
 
--- | Similar to 'feeds', but updates the fields of 'SrcLoc' by folding a 'Text'
--- rather than a 'String'.
+-- | Similar to 'feeds', but updates the fields of 'SrcLoc' by folding over a
+-- 'Text' rather than a 'String'.
 --
 -- prop> feedsText loc xs == Text.foldl' feed loc xs
 --
 -- @since 1.0.0
 feedsText :: SrcLoc -> Text -> SrcLoc
 feedsText = Text.foldl' feed
+{-# INLINE feedsText #-}
+
+-- | Similar to 'feeds', but updates the fields of 'SrcLoc' by folding over a
+-- 'ByteString' rather than a 'String'.
+--
+-- @since 1.0.0
+feedsByteString :: SrcLoc -> ByteString -> SrcLoc
+feedsByteString = ByteString.foldl' feed
+{-# INLINE feedsByteString #-}
 
 -- SrcLoc - Lenses -------------------------------------------------------------
 
@@ -268,7 +274,7 @@ nextLines loc (I# n#) = box (Prim.nextLines# (unbox loc) n#)
 
 -- SrcLoc - Show ---------------------------------------------------------------
 
--- | TODO
+-- | TODO: docs
 --
 -- >>> format (SrcLoc 5 2 8)
 -- "5:2:8"
@@ -277,7 +283,7 @@ nextLines loc (I# n#) = box (Prim.nextLines# (unbox loc) n#)
 format :: SrcLoc -> String
 format loc = formats loc ""
 
--- | TODO
+-- |
 --
 -- @since 1.0.0
 formats :: SrcLoc -> ShowS
