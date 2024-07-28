@@ -9,51 +9,26 @@
 -- Stability   :  stable
 -- Portability :  non-portable (GHC extensions)
 --
--- This module provides the 'SrcSpan' type.
+-- This module provides the 'SrcSpan' type along with operations for working
+-- with source spans.
 --
 -- @since 1.0.0
 module Data.SrcSpan
-  ( module Data.SrcSpan.Core
-    -- * Construction
-  , defaultSrcSpan
+  ( -- * SrcSpan
+    SrcSpan (..)
+    -- ** Basic Operations
   , fromSrcLoc
-    -- * Basic Operations
-  , diff
-    -- * Show
+  , diffSrcSpan
+  , defaultSrcSpan
+    -- ** Show
   , showSrcSpan
   , showsSrcSpan
   ) where
 
-import Data.SrcLoc (SrcLoc)
 import Data.SrcLoc qualified as SrcLoc
-import Data.SrcSpan.Core
+import Data.SrcSpan.Core (SrcSpan (..), defaultSrcSpan, fromSrcLoc)
 
 import Prelude hiding (span)
-
--- SrcSpan - Construction ------------------------------------------------------
-
--- | The default source span.
---
--- @
--- 'defaultSrcSpan' == 'SrcSpan' 'SrcLoc.defaultSrcLoc' 'SrcLoc.defaultSrcLoc'
--- @
---
--- @since 1.0.0
-defaultSrcSpan :: SrcSpan
-defaultSrcSpan = fromSrcLoc SrcLoc.defaultSrcLoc
-{-# INLINE CONLIKE defaultSrcSpan #-}
-
--- | Converts a given source location @loc@ into a source span. The resulting
--- source span will 'begin' and 'end' at the location @loc@.
---
--- @
--- 'fromSrcLoc' loc == 'SrcSpan' loc loc
--- @
---
--- @since 1.0.0
-fromSrcLoc :: SrcLoc -> SrcSpan
-fromSrcLoc loc = SrcSpan loc loc
-{-# INLINE CONLIKE fromSrcLoc #-}
 
 -- SrcSpan - Basic Operations --------------------------------------------------
 
@@ -62,13 +37,13 @@ fromSrcLoc loc = SrcSpan loc loc
 -- difference in the source locations 'SrcLoc.posn' component.
 --
 -- @
--- 'diff' ('SrcSpan' a b) == 'SrcLoc.posn' b - 'SrcLoc.posn' a
+-- 'diffSrcSpan' ('SrcSpan' a b) == 'SrcLoc.posn' b - 'SrcLoc.posn' a
 -- @
 --
 -- @since 1.0.0
-diff :: SrcSpan -> Int
-diff (SrcSpan loc0 loc1) = SrcLoc.diff loc0 loc1
-{-# INLINE diff #-}
+diffSrcSpan :: SrcSpan -> Int
+diffSrcSpan (SrcSpan loc0 loc1) = SrcLoc.diff loc0 loc1
+{-# INLINE diffSrcSpan #-}
 
 -- SrcSpan - Show --------------------------------------------------------------
 
