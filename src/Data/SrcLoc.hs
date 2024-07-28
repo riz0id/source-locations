@@ -38,8 +38,8 @@ module Data.SrcLoc
   , feedsText
   , feedsByteString
     -- ** Show
-  , format
-  , formats
+  , showSrcLoc
+  , showsSrcLoc
   ) where
 
 import Control.DeepSeq (NFData)
@@ -274,17 +274,18 @@ nextLines loc (I# n#) = box (Prim.nextLines# (unbox loc) n#)
 
 -- SrcLoc - Show ---------------------------------------------------------------
 
--- | TODO: docs
+-- | The implementation of 'show' for 'SrcLoc'. Converts a 'SrcLoc' to a
+-- 'String'.
 --
 -- >>> format (SrcLoc 5 2 8)
 -- "5:2:8"
 --
 -- @since 1.0.0
-format :: SrcLoc -> String
-format loc = formats loc ""
+showSrcLoc :: SrcLoc -> String
+showSrcLoc loc = showsSrcLoc loc ""
 
--- |
+-- | Produce a 'ShowS' printer function for a given 'SrcLoc'.
 --
 -- @since 1.0.0
-formats :: SrcLoc -> ShowS
-formats (SrcLoc ps ln cn) rest = shows ps (':' : shows ln (':' : shows cn rest))
+showsSrcLoc :: SrcLoc -> ShowS
+showsSrcLoc (SrcLoc ps ln cn) rest = shows ps (':' : shows ln (':' : shows cn rest))

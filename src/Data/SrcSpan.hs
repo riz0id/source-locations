@@ -20,8 +20,8 @@ module Data.SrcSpan
     -- * Basic Operations
   , diff
     -- * Show
-  , format
-  , formats
+  , showSrcSpan
+  , showsSrcSpan
   ) where
 
 import Data.SrcLoc (SrcLoc)
@@ -30,7 +30,7 @@ import Data.SrcSpan.Core
 
 import Prelude hiding (span)
 
--- SrcLoc - Construction -------------------------------------------------------
+-- SrcSpan - Construction ------------------------------------------------------
 
 -- | The default source span.
 --
@@ -55,7 +55,7 @@ fromSrcLoc :: SrcLoc -> SrcSpan
 fromSrcLoc loc = SrcSpan loc loc
 {-# INLINE CONLIKE fromSrcLoc #-}
 
--- Basic Operations ------------------------------------------------------------
+-- SrcSpan - Basic Operations --------------------------------------------------
 
 -- | Similar to 'SrcLoc.diff' defined by "Data.SrcLoc", but uses the 'begin' and
 -- 'end' source locations of the given source span when calculating the
@@ -70,21 +70,20 @@ diff :: SrcSpan -> Int
 diff (SrcSpan loc0 loc1) = SrcLoc.diff loc0 loc1
 {-# INLINE diff #-}
 
--- Basic Operations ------------------------------------------------------------
+-- SrcSpan - Show --------------------------------------------------------------
 
--- Show ------------------------------------------------------------------------
-
--- | TODO
+-- | The implementation of 'show' for 'SrcSpan'. Converts a 'SrcSpan' to a
+-- 'String'.
 --
 -- >>> format (SrcSpan (SrcLoc 5 2 8) (SrcSpan 10 3 10))
 -- "5:2:8-10:3:10"
 --
 -- @since 1.0.0
-format :: SrcSpan -> String
-format span = formats span ""
+showSrcSpan :: SrcSpan -> String
+showSrcSpan span = showsSrcSpan span ""
 
--- | TODO
+-- | Produce a 'ShowS' printer function for a given 'SrcSpan'.
 --
 -- @since 1.0.0
-formats :: SrcSpan -> ShowS
-formats (SrcSpan loc0 loc1) rest = SrcLoc.formats loc0 ('-' : SrcLoc.formats loc1 rest)
+showsSrcSpan :: SrcSpan -> ShowS
+showsSrcSpan (SrcSpan loc0 loc1) rest = SrcLoc.showsSrcLoc loc0 ('-' : SrcLoc.showsSrcLoc loc1 rest)
