@@ -51,13 +51,13 @@ import Language.Haskell.TH.Syntax qualified as TH
 -- | t'SrcLoc#' is an unboxed source location.
 --
 -- @since 1.0.0
-newtype SrcLoc# :: TYPE SrcLocRep where 
+newtype SrcLoc# :: TYPE SrcLocRep where
   SL# :: (# Int#, Int#, Int# #) -> SrcLoc#
 
 -- | TODO
 --
 -- @since 1.0.0
-type SrcLocRep :: RuntimeRep 
+type SrcLocRep :: RuntimeRep
 type SrcLocRep = 'TupleRep '[ 'IntRep, 'IntRep, 'IntRep ]
 
 -- | TODO
@@ -160,16 +160,16 @@ diff# (SrcLoc# x0# _ _) (SrcLoc# x1# _ _) = x1# GHC.-# x0#
 --
 -- @since 1.0.0
 nextColn# :: SrcLoc# -> SrcLoc#
-nextColn# loc# = nextColns# loc# 1# 
+nextColn# loc# = nextColns# loc# 1#
 
 -- | TODO
 --
 -- @since 1.0.0
 nextColns# :: SrcLoc# -> Int# -> SrcLoc#
-nextColns# (SrcLoc# p0# l# c0#) n# = 
-  let !p1# = Int.addInt# n# p0# 
-      !c1# = Int.addInt# n# c0# 
-   in SrcLoc# p1# l# c1# 
+nextColns# (SrcLoc# p0# l# c0#) n# =
+  let !p1# = Int.addInt# n# p0#
+      !c1# = Int.addInt# n# c0#
+   in SrcLoc# p1# l# c1#
 
 -- | TODO
 --
@@ -181,7 +181,7 @@ nextLine# loc# = nextLines# loc# 1#
 --
 -- @since 1.0.0
 nextLines# :: SrcLoc# -> Int# -> SrcLoc#
-nextLines# (SrcLoc# p0# l0# c#) n# = 
-  let !p1# = Int.addInt# n# p0# 
-      !l1# = Int.addInt# n# l0# 
-   in SrcLoc# p1# l1# c# 
+nextLines# (SrcLoc# p0# l0# _) n# =
+  let !p1# = Int.addInt# n# p0#
+      !l1# = Int.addInt# n# l0#
+   in SrcLoc# p1# l1# 1#
