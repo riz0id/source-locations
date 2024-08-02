@@ -19,10 +19,11 @@
 module Data.SrcLoc
   ( -- * SrcLoc
     SrcLoc (..)
-    -- ** Construction
-  , defaultSrcLoc
     -- ** Basic Operations
+  , defaultSrcLoc
   , diff
+  , boxSrcLoc
+  , unboxSrcLoc
     -- ** Lenses
   , srcLocPosn
   , srcLocLine
@@ -82,27 +83,27 @@ data SrcLoc = SrcLoc
 
 -- | @since 1.0.0
 instance Eq SrcLoc where
-  loc0 == loc1 = Bool.toBool (unbox loc0 Ord.==# unbox loc1)
+  loc0 == loc1 = Bool.toBool (unboxSrcLoc loc0 Ord.==# unboxSrcLoc loc1)
   {-# INLINE (==) #-}
 
-  loc0 /= loc1 = Bool.toBool (unbox loc0 Ord./=# unbox loc1)
+  loc0 /= loc1 = Bool.toBool (unboxSrcLoc loc0 Ord./=# unboxSrcLoc loc1)
   {-# INLINE (/=) #-}
 
 -- | @since 1.0.0
 instance Ord SrcLoc where
-  compare loc0 loc1 = Ord.toOrdering (Ord.compare# (unbox loc0) (unbox loc1))
+  compare loc0 loc1 = Ord.toOrdering (Ord.compare# (unboxSrcLoc loc0) (unboxSrcLoc loc1))
   {-# INLINE compare #-}
 
-  loc0 > loc1 = Bool.toBool (unbox loc0 Ord.># unbox loc1)
+  loc0 > loc1 = Bool.toBool (unboxSrcLoc loc0 Ord.># unboxSrcLoc loc1)
   {-# INLINE (>) #-}
 
-  loc0 >= loc1 = Bool.toBool (unbox loc0 Ord.>=# unbox loc1)
+  loc0 >= loc1 = Bool.toBool (unboxSrcLoc loc0 Ord.>=# unboxSrcLoc loc1)
   {-# INLINE (>=) #-}
 
-  loc0 < loc1 = Bool.toBool (unbox loc0 Ord.<# unbox loc1)
+  loc0 < loc1 = Bool.toBool (unboxSrcLoc loc0 Ord.<# unboxSrcLoc loc1)
   {-# INLINE (<) #-}
 
-  loc0 <= loc1 = Bool.toBool (unbox loc0 Ord.<=# unbox loc1)
+  loc0 <= loc1 = Bool.toBool (unboxSrcLoc loc0 Ord.<=# unboxSrcLoc loc1)
   {-# INLINE (<=) #-}
 
 -- | @since 1.0.0
@@ -118,15 +119,7 @@ instance PrintfArg SrcLoc where
       fmtChar = Printf.fmtChar fmt
   {-# INLINE formatArg #-}
 
-box :: SrcLoc# -> SrcLoc
-box (SrcLoc# x# y# z#) = SrcLoc (I# x#) (I# y#) (I# z#)
-{-# INLINE CONLIKE box #-}
-
-unbox :: SrcLoc -> SrcLoc#
-unbox (SrcLoc (I# x#) (I# y#) (I# z#)) = SrcLoc# x# y# z#
-{-# INLINE CONLIKE unbox #-}
-
--- SrcLoc - Construction -------------------------------------------------------
+-- SrcLoc - Basic Operations ---------------------------------------------------
 
 -- | The default source location, equivalent to:
 --
@@ -139,8 +132,6 @@ defaultSrcLoc :: SrcLoc
 defaultSrcLoc = SrcLoc 0 1 1
 {-# INLINE CONLIKE defaultSrcLoc #-}
 
--- SrcLoc - Basic Operations ---------------------------------------------------
-
 infixl 6 `diff`
 
 -- | Calculate the difference between the 'posn' component of two source
@@ -148,8 +139,22 @@ infixl 6 `diff`
 --
 -- @since 1.0.0
 diff :: SrcLoc -> SrcLoc -> Int
-diff loc0 loc1 = I# (Prim.diff# (unbox loc0) (unbox loc1))
+diff loc0 loc1 = I# (Prim.diff# (unboxSrcLoc loc0) (unboxSrcLoc loc1))
 {-# INLINE diff #-}
+
+-- | Box a 'SrcLoc'. Convert an unboxed 'SrcLoc#' to a boxed 'SrcLoc'.
+--
+-- @since 1.0.0
+boxSrcLoc :: SrcLoc# -> SrcLoc
+boxSrcLoc (SrcLoc# x# y# z#) = SrcLoc (I# x#) (I# y#) (I# z#)
+{-# INLINE CONLIKE boxSrcLoc #-}
+
+-- | Unbox a 'SrcLoc'. Convert an boxed 'SrcLoc#' to a boxed 'SrcLoc'.
+--
+-- @since 1.0.0
+unboxSrcLoc :: SrcLoc -> SrcLoc#
+unboxSrcLoc (SrcLoc (I# x#) (I# y#) (I# z#)) = SrcLoc# x# y# z#
+{-# INLINE CONLIKE unboxSrcLoc #-}
 
 -- srcloc - feed ---------------------------------------------------------------
 
@@ -168,7 +173,7 @@ diff loc0 loc1 = I# (Prim.diff# (unbox loc0) (unbox loc1))
 --
 -- @since 1.0.0
 feed :: SrcLoc -> Char -> SrcLoc
-feed loc (C# chr#) = box (Prim.feed# (unbox loc) chr#)
+feed loc (C# chr#) = boxSrcLoc (Prim.feed# (unboxSrcLoc loc) chr#)
 {-# INLINE feed #-}
 
 -- | The 'feeds' function updates a 'SrcLoc' according to the characters in a
@@ -233,7 +238,7 @@ srcLocColn = lens coln \s x -> s { coln = x }
 --
 -- @since 1.0.0
 nextColn :: SrcLoc -> SrcLoc
-nextColn loc = box (Prim.nextColn# (unbox loc))
+nextColn loc = boxSrcLoc (Prim.nextColn# (unboxSrcLoc loc))
 {-# INLINE nextColn #-}
 
 -- | Advances the given source location's column by @n@. The resulting source
@@ -245,7 +250,7 @@ nextColn loc = box (Prim.nextColn# (unbox loc))
 --
 -- @since 1.0.0
 nextColns :: SrcLoc -> Int -> SrcLoc
-nextColns loc (I# n#) = box (Prim.nextColns# (unbox loc) n#)
+nextColns loc (I# n#) = boxSrcLoc (Prim.nextColns# (unboxSrcLoc loc) n#)
 {-# INLINE nextColns #-}
 
 -- | Advances the given source location to the next line. The resulting source
@@ -257,7 +262,7 @@ nextColns loc (I# n#) = box (Prim.nextColns# (unbox loc) n#)
 --
 -- @since 1.0.0
 nextLine :: SrcLoc -> SrcLoc
-nextLine loc = box (Prim.nextLine# (unbox loc))
+nextLine loc = boxSrcLoc (Prim.nextLine# (unboxSrcLoc loc))
 {-# INLINE nextLine #-}
 
 -- | Advances the given source location's line by @n@. The resulting source
@@ -269,7 +274,7 @@ nextLine loc = box (Prim.nextLine# (unbox loc))
 --
 -- @since 1.0.0
 nextLines :: SrcLoc -> Int -> SrcLoc
-nextLines loc (I# n#) = box (Prim.nextLines# (unbox loc) n#)
+nextLines loc (I# n#) = boxSrcLoc (Prim.nextLines# (unboxSrcLoc loc) n#)
 {-# INLINE nextLines #-}
 
 -- SrcLoc - Show ---------------------------------------------------------------
