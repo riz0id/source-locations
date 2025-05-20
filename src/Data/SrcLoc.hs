@@ -24,10 +24,6 @@ module Data.SrcLoc
   , diff
   , boxSrcLoc
   , unboxSrcLoc
-    -- ** Lenses
-  , srcLocPosn
-  , srcLocLine
-  , srcLocColn
     -- ** Modification
   , nextColn
   , nextColns
@@ -44,7 +40,6 @@ module Data.SrcLoc
   ) where
 
 import Control.DeepSeq (NFData)
-import Control.Lens (Lens', lens)
 
 import Data.Bool.Prim qualified as Bool
 import Data.ByteString (ByteString)
@@ -113,7 +108,7 @@ instance NFData SrcLoc
 instance PrintfArg SrcLoc where
   formatArg loc fmt
     | 's' == fmtChar = shows loc
-    | otherwise = Printf.errorBadFormat fmtChar
+    | otherwise      = Printf.errorBadFormat fmtChar
     where
       fmtChar :: Char
       fmtChar = Printf.fmtChar fmt
@@ -156,7 +151,7 @@ unboxSrcLoc :: SrcLoc -> SrcLoc#
 unboxSrcLoc (SrcLoc (I# x#) (I# y#) (I# z#)) = SrcLoc# x# y# z#
 {-# INLINE CONLIKE unboxSrcLoc #-}
 
--- srcloc - feed ---------------------------------------------------------------
+-- SrcLoc - Feed ---------------------------------------------------------------
 
 -- | "Feeds" a character to a t'SrcLoc'. This produces a new t'SrcLoc' with
 -- fields incremented according to the kind character the source location was
@@ -203,29 +198,6 @@ feedsText = Text.foldl' feed
 feedsByteString :: SrcLoc -> ByteString -> SrcLoc
 feedsByteString = ByteString.foldl' feed
 {-# INLINE feedsByteString #-}
-
--- SrcLoc - Lenses -------------------------------------------------------------
-
--- | Lens focusing on the 'posn' field of 'SrcLoc'.
---
--- @since 1.0.0
-srcLocPosn :: Lens' SrcLoc Int
-srcLocPosn = lens posn \s x -> s { posn = x }
-{-# INLINE srcLocPosn #-}
-
--- | Lens focusing on the 'line' field of 'SrcLoc'.
---
--- @since 1.0.0
-srcLocLine :: Lens' SrcLoc Int
-srcLocLine = lens line \s x -> s { line = x }
-{-# INLINE srcLocLine #-}
-
--- | Lens focusing on the 'coln' field of 'SrcLoc'.
---
--- @since 1.0.0
-srcLocColn :: Lens' SrcLoc Int
-srcLocColn = lens coln \s x -> s { coln = x }
-{-# INLINE srcLocColn #-}
 
 -- SrcLoc - Modification -------------------------------------------------------
 

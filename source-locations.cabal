@@ -2,8 +2,11 @@ cabal-version: 2.4
 
 name:        source-locations
 category:    Data
-version:     1.0.0
-synopsis:    Create and manipulate source file locations.
+version:     1.0.1
+
+synopsis:
+  Create and manipulate source file locations.
+
 description:
   This packages provides the 'SrcLoc' type for representing source locations
   along with basic operations for creating and manipulating source locations.
@@ -27,22 +30,12 @@ source-repository head
   type:     git
   location: https://github.com/riz0id/source-locations
 
-flag lens
-  Description: Compile definitions and dependencies for lenses.
-  Default:     False
-  Manual:      True
-
-flag llvm
-  Description: Compile using the LLVM backend.
-  Default:     False
-  Manual:      True
-
 common common
   default-language: Haskell2010
 
   default-extensions:
-    ImportQualifiedPost MagicHash PatternSynonyms TemplateHaskellQuotes
-    UnboxedTuples
+    BlockArguments ImportQualifiedPost MagicHash PatternSynonyms
+    TemplateHaskellQuotes UnboxedTuples
 
   ghc-options:
     -Wall
@@ -74,15 +67,11 @@ library
     -- more iterations.
     -fmax-simplifier-iterations=20
 
-  if flag(llvm)
-    ghc-options: -fllvm
-
   build-depends:
-    , bytestring
+    , bytestring       >= 0.12.0 && < 0.13
     , deepseq          >= 1.4.6  && < 1.6
-    , data-default
+    , data-default     >= 0.7.1  && < 0.8
     , ghc-prim         >= 0.7.0  && < 0.12
-    , lens             >= 5.2.1  && < 5.3
     , prim-bool        >= 1.0.0  && < 1.1.0
     , prim-char        >= 1.0.0  && < 1.1.0
     , prim-int         >= 1.0.0  && < 1.1.0
@@ -103,9 +92,6 @@ test-suite test
   type:           exitcode-stdio-1.0
   hs-source-dirs: test
   main-is:        Test.hs
-
-  default-extensions:
-    BlockArguments
 
   ghc-options:
     -threaded
